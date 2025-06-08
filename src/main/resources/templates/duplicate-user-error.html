@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>خطا در ثبت نام</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f9f9f9; padding: 50px; }
+        .error-container { background: #ffe0e0; border: 1px solid #ffaaaa; padding: 20px; border-radius: 8px; max-width: 500px; margin: auto; }
+        h1 { color: #cc0000; }
+        p { font-size: 18px; }
+        a { color: #0066cc; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+<div class="error-container">
+    <h1>ثبت نام ناموفق!</h1>
+    <p th:text="${errorMessage}"></p>
+    <p><a href="/register">بازگشت به صفحه ثبت نام</a></p>
+</div>
+</body>
+</html>

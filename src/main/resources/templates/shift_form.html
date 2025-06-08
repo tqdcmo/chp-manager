@@ -1,6 +1,5 @@
-
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" lang="fa">
 <head>
     <meta charset="UTF-8">
     <title>ثبت شیفت</title>
@@ -24,7 +23,10 @@
 
         <div class="mb-3">
             <label class="form-label">نام اپراتور:</label>
-            <input type="text" class="form-control" th:field="*{operatorName}" required>
+            <!-- نمایش نام اپراتور به صورت فقط خواندنی -->
+            <input type="text" class="form-control" th:value="*{operatorName}" readonly>
+            <!-- مقدار نام اپراتور به صورت مخفی برای ارسال به سرور -->
+            <input type="hidden" th:field="*{operatorName}" />
         </div>
 
         <div class="mb-3">

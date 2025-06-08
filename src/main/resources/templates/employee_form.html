@@ -1,38 +1,109 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" lang="fa">
 <head>
-    <title>فرم ثبت کارمند</title>
     <meta charset="UTF-8">
+    <title>فرم ثبت کارمند</title>
+    <style>
+        body {
+            font-family: "Vazir", Tahoma, sans-serif;
+            background-color: #f4f7f8;
+            color: #333;
+            direction: rtl;
+            padding: 30px;
+        }
+
+        .form-container {
+            background-color: #fff;
+            max-width: 500px;
+            margin: auto;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+        }
+
+        h2 {
+            text-align: center;
+            color: #444;
+            margin-bottom: 30px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: bold;
+        }
+
+        input[type="text"],
+        input[type="password"],
+        select {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+            box-sizing: border-box;
+        }
+
+        input[type="checkbox"] {
+            margin-left: 10px;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: #4caf50;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        .success-message {
+            color: green;
+            text-align: center;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+    </style>
 </head>
 <body>
-<h2>فرم ثبت کارمند جدید</h2>
 
-<!-- پیام موفقیت بعد از ذخیره -->
-<div th:if="${param.success}">
-    <p style="color: green;">✅ اطلاعات با موفقیت ذخیره شد.</p>
+<div class="form-container">
+    <h2>فرم ثبت کارمند جدید</h2>
+
+    <div th:if="${param.success}" class="success-message">
+        ✅ اطلاعات با موفقیت ذخیره شد.
+    </div>
+
+    <form th:action="@{/employee/save}" th:object="${employee}" method="post">
+        <label>نام کامل:</label>
+        <input type="text" th:field="*{fullName}" required/>
+
+        <label>نام کاربری:</label>
+        <input type="text" th:field="*{username}" required/>
+
+        <label>رمز عبور:</label>
+        <input type="password" th:field="*{password}" required/>
+
+        <label>نقش:</label>
+        <select th:field="*{role}">
+            <option value="ROLE_OPERATOR">اپراتور</option>
+            <option value="ROLE_ADMIN">مدیر</option>
+        </select>
+
+        <label>
+            <input type="checkbox" th:field="*{active}"/>
+            فعال؟
+        </label>
+
+        <button type="submit">ثبت</button>
+    </form>
 </div>
-
-<form th:action="@{/employee/save}" th:object="${employee}" method="post">
-    <label>نام کامل:</label>
-    <input type="text" th:field="*{fullName}" required/><br/><br/>
-
-    <label>نام کاربری:</label>
-    <input type="text" th:field="*{username}" required/><br/><br/>
-
-    <label>رمز عبور:</label>
-    <input type="password" th:field="*{password}" required/><br/><br/>
-
-    <label>نقش:</label>
-    <select th:field="*{role}">
-        <option value="ROLE_OPERATOR">اپراتور</option>
-        <option value="ROLE_ADMIN">مدیر</option>
-    </select><br/><br/>
-
-    <label>فعال؟</label>
-    <input type="checkbox" th:field="*{active}"/><br/><br/>
-
-    <button type="submit">ثبت</button>
-</form>
 
 </body>
 </html>

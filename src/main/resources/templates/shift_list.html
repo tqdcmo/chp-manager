@@ -21,6 +21,7 @@
             <th>اپراتور</th>
             <th>برق تولید شده (کیلووات)</th>
             <th>گاز مصرفی (متر مکعب)</th>
+            <th>گزارش شیفت</th> <!-- ستون جدید -->
             <th>عملیات</th>
         </tr>
         </thead>
@@ -32,6 +33,9 @@
             <td th:text="${shift.operatorName}"></td>
             <td th:text="${shift.powerGenerated}"></td>
             <td th:text="${shift.gasConsumed}"></td>
+            <td>
+                <a th:href="@{'/shift/report/' + ${shift.id}}" class="btn btn-info btn-sm">📄 مشاهده</a>
+            </td>
             <td>
                 <a th:href="@{'/shift/edit/' + ${shift.id}}" class="btn btn-warning btn-sm">✏ ویرایش</a>
                 <a th:href="@{'/shift/delete/' + ${shift.id}}" class="btn btn-danger btn-sm"

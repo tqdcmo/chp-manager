@@ -2,12 +2,15 @@ package com.powerchp.chpmanager.controller;
 
 import com.powerchp.chpmanager.model.Employee;
 import com.powerchp.chpmanager.repository.EmployeeRepository;
+import com.powerchp.chpmanager.service.EmployeeService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.util.Optional;
 
 @Controller
@@ -18,71 +21,99 @@ public class EmployeeController {
     private EmployeeRepository employeeRepository;
 
     @Autowired
-    private PasswordEncoder passwordEncoder;  // اضافه کردن PasswordEncoder
+    private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private EmployeeService employeeService;
 
     // نمایش فرم ثبت کارمند جدید
     @GetMapping("/new")
-    public String showForm(Model model) {
+    public String showForm(Model model, Principal principal) {
+        if (!employeeService.hasRole(principal.getName(), "ROLE_ADMIN")) {
+            throw new AccessDeniedException("شما اجازه انجام این عملیات را ندارید.");
+        }
         model.addAttribute("employee", new Employee());
         return "employee_form";
     }
 
-    // ذخیره کارمند (ثبت یا ویرایش)
     @PostMapping("/save")
-    public String saveEmployee(@ModelAttribute("employee") Employee employee) {
+    public String saveEmployee(@ModelAttribute("employee") Employee employee, Principal principal) {
+        String username = principal.getName();
+
+        if (!employeeService.hasRole(username, "ROLE_ADMIN")) {
+            throw new AccessDeniedException("شما اجازه انجام این عملیات را ندارید.");
+        }
 
         if (employee.getId() != null) {
-            // اگر این یک ویرایش است، رمز عبور قبلی را حفظ کنیم مگر اینکه رمز جدید داده شده باشد
-            Optional<Employee> existingEmployeeOpt = employeeRepository.findById(employee.getId());
-            if (existingEmployeeOpt.isPresent()) {
-                Employee existingEmployee = existingEmployeeOpt.get();
+            // حالت ویرایش
+            Optional<Employee> existingOpt = employeeRepository.findById(employee.getId());
+            if (existingOpt.isPresent()) {
+                Employee existing = existingOpt.get();
+
+                if (existing.getId() == 1L && !username.equals("admin")) {
+                    throw new AccessDeniedException("ادمین اصلی قابل ویرایش توسط شما نیست.");
+                }
+
                 if (employee.getPassword() == null || employee.getPassword().isEmpty()) {
-                    // اگر رمز جدید خالی است، رمز قبلی رو نگه دار
-                    employee.setPassword(existingEmployee.getPassword());
+                    employee.setPassword(existing.getPassword());
                 } else {
-                    // رمز جدید داده شده، هش کن
-                    String encodedPassword = passwordEncoder.encode(employee.getPassword());
-                    employee.setPassword(encodedPassword);
+                    employee.setPassword(passwordEncoder.encode(employee.getPassword()));
                 }
             }
         } else {
-            // ثبت کارمند جدید - رمز را حتما هش کن
-            String encodedPassword = passwordEncoder.encode(employee.getPassword());
-            employee.setPassword(encodedPassword);
+            // ثبت جدید - کلمه عبور رمزگذاری شود
+            employee.setPassword(passwordEncoder.encode(employee.getPassword()));
         }
 
-        employeeRepository.save(employee);
-        return "redirect:/employee/new?success=true";
+        employeeRepository.save(employee);  // اینجا ذخیره می‌شود
+        return "redirect:/employee/list";   // و بعد به لیست می‌رود
     }
 
-    // نمایش لیست همه کارمندان
+
     @GetMapping("/list")
-    public String listEmployees(Model model) {
+    public String listEmployees(Model model, Principal principal) {
+        if (!employeeService.hasRole(principal.getName(), "ROLE_ADMIN")) {
+            throw new AccessDeniedException("شما اجازه انجام این عملیات را ندارید.");
+        }
         model.addAttribute("employees", employeeRepository.findAll());
         return "employee_list";
     }
 
-    // نمایش فرم ویرایش کارمند
     @GetMapping("/edit/{id}")
-    public String editEmployee(@PathVariable Long id, Model model) {
+    public String editEmployee(@PathVariable Long id, Model model, Principal principal) {
+        if (!employeeService.hasRole(principal.getName(), "ROLE_ADMIN")) {
+            throw new AccessDeniedException("شما اجازه انجام این عملیات را ندارید.");
+        }
+
         Employee employee = employeeRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("کارمند یافت نشد: " + id));
-        // برای ویرایش، رمز را خالی بگذار تا در فرم نشان داده نشود
+
+        if (employee.getId() == 1L && !principal.getName().equals("admin")) {
+            throw new AccessDeniedException("ادمین اصلی قابل ویرایش توسط شما نیست.");
+        }
+
         employee.setPassword("");
         model.addAttribute("employee", employee);
         return "employee_form";
     }
 
-    // حذف کارمند
     @GetMapping("/delete/{id}")
-    public String deleteEmployee(@PathVariable Long id) {
+    public String deleteEmployee(@PathVariable Long id, Principal principal, Model model) {
+        if (!employeeService.hasRole(principal.getName(), "ROLE_ADMIN")) {
+            throw new AccessDeniedException("شما اجازه انجام این عملیات را ندارید.");
+        }
+
+        if (id == 1L) {
+            model.addAttribute("errorMessage", "مدیر اصلی قابل حذف نیست.");
+            return "redirect:/employee/list";
+        }
+
         employeeRepository.deleteById(id);
         return "redirect:/employee/list";
     }
 
-    // داشبورد (صفحه اصلی یا خلاصه)
     @GetMapping("/dashboard")
     public String dashboard() {
-        return "dashboard"; // نام فایل HTML مربوط به داشبورد
+        return "dashboard";
     }
 }
