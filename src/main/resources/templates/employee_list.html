@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>لیست کاربران سیستم</title>
+    <meta charset="UTF-8"/>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+</head>
+<body class="bg-light">
+<div class="container mt-4">
+    <h2>لیست کاربران سیستم</h2>
+    <a href="/employee/new" class="btn btn-primary mb-3">ثبت کارمند جدید</a>
+
+    <table class="table table-bordered table-striped bg-white">
+        <thead>
+        <tr>
+            <th>شناسه</th>
+            <th>نام کامل</th>
+            <th>نام کاربری</th>
+            <th>نقش</th>
+            <th>فعال</th>
+            <th>عملیات</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="emp : ${employees}">
+            <td th:text="${emp.id}">1</td>
+            <td th:text="${emp.fullName}">نام کامل</td>
+            <td th:text="${emp.username}">username</td>
+            <td th:text="${emp.role}">ROLE_OPERATOR</td>
+            <td>
+                <span th:text="${emp.active} ? '✅' : '❌'"></span>
+            </td>
+            <td>
+                <a th:href="@{/employee/edit/{id}(id=${emp.id})}" class="btn btn-warning btn-sm">ویرایش</a>
+                <a th:href="@{/employee/delete/{id}(id=${emp.id})}"
+                   onclick="return confirm('آیا مطمئن هستید؟')"
+                   class="btn btn-danger btn-sm">حذف</a>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+</body>
+</html>

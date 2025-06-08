@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>لیست گزارش‌های خطا</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light p-4">
+<div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3 class="text-danger">📛 لیست گزارش‌های خطا</h3>
+        <a href="/error/new" class="btn btn-danger">➕ گزارش جدید</a>
+    </div>
+
+    <table class="table table-bordered table-striped bg-white shadow-sm">
+        <thead class="table-dark">
+        <tr>
+            <th>#</th>
+            <th>زمان گزارش</th>
+            <th>اپراتور</th>
+            <th>شرح خطا</th>
+            <th>شدت خطا</th>
+            <th>عملیات</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="error, iterStat : ${errors}">
+            <td th:text="${iterStat.count}"></td>
+            <td th:text="${#temporals.format(error.reportTime, 'yyyy-MM-dd HH:mm')}"></td>
+            <td th:text="${error.operatorName}"></td>
+            <td th:text="${error.errorDescription}"></td>
+            <td th:text="${error.severity}"></td>
+            <td>
+                <a th:href="@{'/error/edit/' + ${error.id}}" class="btn btn-warning btn-sm">✏ ویرایش</a>
+                <a th:href="@{'/error/delete/' + ${error.id}}" class="btn btn-danger btn-sm"
+                   onclick="return confirm('آیا مطمئن هستید حذف شود؟')">🗑 حذف</a>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+</body>
+</html>
