@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8">
-    <title>ثبت خطا</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <meta charset="UTF-8" />
+    <title>ثبت / ویرایش گزارش خطا</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
 </head>
 <body class="bg-light p-4">
 <div class="container">
@@ -11,34 +11,45 @@
 
     <form th:action="@{/error/save}" th:object="${errorReport}" method="post" class="card p-4 shadow-sm bg-white">
 
+        <!-- Hidden ID field for editing existing reports -->
+        <input type="hidden" th:field="*{id}" />
+
+        <!-- Report Time -->
         <div class="mb-3">
-            <label class="form-label">زمان گزارش:</label>
-            <input type="datetime-local" class="form-control" th:field="*{reportTime}" required>
+            <label class="form-label">⏱ زمان گزارش:</label>
+            <input type="datetime-local" class="form-control" th:field="*{reportTime}" required />
         </div>
 
+        <!-- Operator Name (always readonly, always submitted) -->
         <div class="mb-3">
-            <label class="form-label">نام اپراتور:</label>
-            <input type="text" class="form-control" th:field="*{operatorName}" required>
+            <label class="form-label">👷 نام اپراتور:</label>
+            <input type="text" class="form-control" th:value="*{operatorName}" readonly />
+            <input type="hidden" th:field="*{operatorName}" />
         </div>
 
+        <!-- Error Description -->
         <div class="mb-3">
-            <label class="form-label">شرح خطا:</label>
+            <label class="form-label">📝 شرح خطا:</label>
             <textarea class="form-control" th:field="*{errorDescription}" rows="4" required></textarea>
         </div>
 
+        <!-- Severity -->
         <div class="mb-3">
-            <label class="form-label">شدت خطا:</label>
+            <label class="form-label">🚨 شدت خطا:</label>
             <select class="form-select" th:field="*{severity}" required>
-                <option value="" disabled selected>انتخاب کنید</option>
-                <option value="کم">کم</option>
-                <option value="متوسط">متوسط</option>
-                <option value="زیاد">زیاد</option>
-                <option value="بحرانی">بحرانی</option>
+                <option value="" disabled th:selected="*{severity} == null">انتخاب کنید</option>
+                <option value="کم" th:selected="*{severity} == 'کم'">کم</option>
+                <option value="متوسط" th:selected="*{severity} == 'متوسط'">متوسط</option>
+                <option value="زیاد" th:selected="*{severity} == 'زیاد'">زیاد</option>
+                <option value="بحرانی" th:selected="*{severity} == 'بحرانی'">بحرانی</option>
             </select>
         </div>
 
-        <button type="submit" class="btn btn-danger">ثبت خطا</button>
-        <a href="/error/list" class="btn btn-secondary">بازگشت</a>
+        <!-- Buttons -->
+        <div class="d-flex justify-content-between">
+            <a href="/error/list" class="btn btn-secondary">بازگشت</a>
+            <button type="submit" class="btn btn-danger">💾 ذخیره</button>
+        </div>
     </form>
 </div>
 </body>

@@ -59,14 +59,19 @@ public class EmployeeController {
                 } else {
                     employee.setPassword(passwordEncoder.encode(employee.getPassword()));
                 }
+
+                // preserve createdBy
+                employee.setCreatedBy(existing.getCreatedBy());
+
             }
         } else {
-            // ثبت جدید - کلمه عبور رمزگذاری شود
+            // ثبت جدید
             employee.setPassword(passwordEncoder.encode(employee.getPassword()));
+            employee.setCreatedBy(username); // 👈 ثبت کاربر ایجادکننده
         }
 
-        employeeRepository.save(employee);  // اینجا ذخیره می‌شود
-        return "redirect:/employee/list";   // و بعد به لیست می‌رود
+        employeeRepository.save(employee);
+        return "redirect:/employee/list";
     }
 
 

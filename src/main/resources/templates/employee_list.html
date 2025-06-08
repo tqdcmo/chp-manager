@@ -18,6 +18,7 @@
             <th>نام کاربری</th>
             <th>نقش</th>
             <th>فعال</th>
+            <th>کاربر ثبت‌کننده</th> <!-- ستون جدید -->
             <th>عملیات</th>
         </tr>
         </thead>
@@ -30,6 +31,7 @@
             <td>
                 <span th:text="${emp.active} ? '✅' : '❌'"></span>
             </td>
+            <td th:text="${emp.createdBy}">admin</td> <!-- مقدار ثبت‌کننده -->
             <td>
                 <a th:href="@{/employee/edit/{id}(id=${emp.id})}" class="btn btn-warning btn-sm">ویرایش</a>
                 <a th:href="@{/employee/delete/{id}(id=${emp.id})}"

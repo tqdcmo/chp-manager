@@ -31,9 +31,18 @@
             <td th:text="${error.errorDescription}"></td>
             <td th:text="${error.severity}"></td>
             <td>
-                <a th:href="@{'/error/edit/' + ${error.id}}" class="btn btn-warning btn-sm">✏ ویرایش</a>
-                <a th:href="@{'/error/delete/' + ${error.id}}" class="btn btn-danger btn-sm"
+                <!-- اگر اپراتور گزارش برابر با کاربر لاگین شده بود، دکمه‌های ویرایش و حذف نمایش داده شود -->
+                <a th:if="${error.operatorName == loggedInUsername}"
+                   th:href="@{'/error/edit/' + ${error.id}}"
+                   class="btn btn-warning btn-sm">✏ ویرایش</a>
+
+                <a th:if="${error.operatorName == loggedInUsername}"
+                   th:href="@{'/error/delete/' + ${error.id}}"
+                   class="btn btn-danger btn-sm"
                    onclick="return confirm('آیا مطمئن هستید حذف شود؟')">🗑 حذف</a>
+
+                <!-- اگر گزارش متعلق به کاربر دیگر بود، فقط یک متن یا دکمه غیر فعال نمایش داده شود -->
+                <span th:if="${error.operatorName != loggedInUsername}" class="text-muted">غیرقابل تغییر</span>
             </td>
         </tr>
         </tbody>

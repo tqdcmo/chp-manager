@@ -21,6 +21,8 @@ public class Employee {
 
     private boolean active = true;
 
+    private String createdBy; // 👈 فیلد جدید برای ثبت‌کننده
+
     // Constructors
     public Employee() {
     }
@@ -79,5 +81,13 @@ public class Employee {
 
     public void setActive(boolean active) {
         this.active = active;
+    }
+
+    public String getCreatedBy() {
+        return createdBy;
+    }
+
+    public void setCreatedBy(String createdBy) {
+        this.createdBy = createdBy;
     }
 }
