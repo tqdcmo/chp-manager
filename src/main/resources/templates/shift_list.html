@@ -1,49 +1,164 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html lang="fa" xmlns:th="http://www.thymeleaf.org" dir="rtl">
 <head>
-    <meta charset="UTF-8">
+    <meta charset="UTF-8" />
     <title>لیست شیفت‌ها</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-</head>
-<body class="bg-light p-4">
-<div class="container">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h3>📋 لیست شیفت‌ها</h3>
-        <a href="/shift/new" class="btn btn-primary">➕ شیفت جدید</a>
-    </div>
+    <style>
+        @import url('https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css');
 
-    <table class="table table-bordered table-striped bg-white shadow-sm">
-        <thead class="table-dark">
+        body {
+            font-family: 'Vazirmatn', sans-serif;
+            direction: rtl;
+            background-color: #f9fafb;
+            margin: 20px;
+            color: #333;
+        }
+
+        h2 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 25px;
+        }
+
+        p {
+            max-width: 1200px;
+            margin: 0 auto 20px auto;
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto 30px auto;
+            border-collapse: collapse;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            background-color: #fff;
+        }
+
+        th, td {
+            padding: 12px 18px;
+            text-align: center;
+            border-bottom: 1px solid #e1e4e8;
+        }
+
+        thead th {
+            background-color: #4a90e2;
+            color: white;
+            font-weight: bold;
+        }
+
+        tbody tr:hover {
+            background-color: #f1f8ff;
+        }
+
+        .actions {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .actions a,
+        .actions button {
+            padding: 6px 12px;
+            border-radius: 5px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: background-color 0.3s ease;
+            color: white;
+            border: none;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .report { background-color: #2ecc71; }
+        .report:hover { background-color: #27ae60; }
+
+        .edit { background-color: #f39c12; }
+        .edit:hover { background-color: #d68910; }
+
+        .delete { background-color: #e74c3c; }
+        .delete:hover { background-color: #c0392b; }
+
+        p.links {
+            text-align: center;
+            font-size: 1rem;
+        }
+
+        p.links a {
+            color: #4a90e2;
+            text-decoration: none;
+            font-weight: 600;
+            margin: 0 12px;
+        }
+
+        p.links a:hover {
+            color: #2c3e50;
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+<h2>لیست شیفت‌ها</h2>
+
+<p>کاربر جاری: <span th:text="${currentUser}">کاربر</span></p>
+
+<div class="table-wrapper">
+    <table>
+        <thead>
         <tr>
-            <th>#</th>
-            <th>شروع شیفت</th>
-            <th>پایان شیفت</th>
+            <th>شماره</th>
             <th>اپراتور</th>
-            <th>برق تولید شده (کیلووات)</th>
-            <th>گاز مصرفی (متر مکعب)</th>
-            <th>گزارش شیفت</th> <!-- ستون جدید -->
+            <th>زمان شروع</th>
+            <th>زمان پایان</th>
+            <th>توان تولیدی (کیلووات ساعت)</th>
+            <th>مصرف گاز (مترمکعب)</th>
+            <th>راندمان</th>
+            <th>مدت زمان (دقیقه)</th>
             <th>عملیات</th>
         </tr>
         </thead>
         <tbody>
-        <tr th:each="shift, iterStat : ${shifts}">
-            <td th:text="${iterStat.count}"></td>
-            <td th:text="${#temporals.format(shift.startTime, 'yyyy-MM-dd HH:mm')}"></td>
-            <td th:text="${#temporals.format(shift.endTime, 'yyyy-MM-dd HH:mm')}"></td>
-            <td th:text="${shift.operatorName}"></td>
-            <td th:text="${shift.powerGenerated}"></td>
-            <td th:text="${shift.gasConsumed}"></td>
-            <td>
-                <a th:href="@{'/shift/report/' + ${shift.id}}" class="btn btn-info btn-sm">📄 مشاهده</a>
+        <tr th:each="shift : ${shifts}">
+            <td th:text="${shift.id}">1</td>
+            <td th:text="${shift.operatorName}">اپراتور</td>
+            <td th:text="${#temporals.format(shift.startTime, 'yyyy/MM/dd HH:mm')}">شروع</td>
+            <td th:text="${#temporals.format(shift.endTime, 'yyyy/MM/dd HH:mm')}">پایان</td>
+            <td th:text="${shift.powerGenerated ?: 0}">100</td>
+            <td th:text="${shift.gasConsumed ?: 0}">50</td>
+            <td th:text="${#numbers.formatDecimal(shift.efficiency * 100, 1, 2) + '٪'}">90٪</td>
+            <td th:text="${shift.durationMinutes ?: 0}">60</td>
+            <td class="actions">
+                <a th:href="@{/shift/report/{id}(id=${shift.id})}" target="_blank" class="report">گزارش PDF</a>
+
+                <span th:if="${isAdmin or (shift.operatorName == currentUser)}">
+                    <a th:href="@{/shift/edit/{id}(id=${shift.id})}" class="edit">ویرایش</a>
+                    <form th:action="@{/shift/delete/{id}(id=${shift.id})}" method="post" style="display:inline;" onsubmit="return confirm('آیا مطمئن هستید؟');">
+                        <button type="submit" class="delete">حذف</button>
+                    </form>
+                </span>
             </td>
-            <td>
-                <a th:href="@{'/shift/edit/' + ${shift.id}}" class="btn btn-warning btn-sm">✏ ویرایش</a>
-                <a th:href="@{'/shift/delete/' + ${shift.id}}" class="btn btn-danger btn-sm"
-                   onclick="return confirm('آیا مطمئنی؟')">🗑 حذف</a>
-            </td>
+        </tr>
+        <tr th:if="${#lists.isEmpty(shifts)}">
+            <td colspan="9">هیچ شیفتی یافت نشد.</td>
         </tr>
         </tbody>
     </table>
 </div>
+
+<p class="links">
+    <a href="/shift/new">ایجاد شیفت جدید</a> |
+    <a href="/shift/list">نمایش همه گزارش‌ها</a> |
+    <a href="/shift/my">شیفت‌های من</a>
+</p>
+
 </body>
 </html>

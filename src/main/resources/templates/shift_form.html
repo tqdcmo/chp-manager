@@ -1,47 +1,82 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="fa">
+<html xmlns:th="http://www.thymeleaf.org" lang="fa" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <title>ثبت شیفت</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>نمایش / ویرایش گزارش</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css" rel="stylesheet" />
+    <style>
+        body {
+            font-family: 'Vazirmatn', sans-serif;
+            direction: rtl;
+        }
+
+        label {
+            font-weight: bold;
+        }
+
+        input[readonly] {
+            background-color: #e9ecef;
+        }
+    </style>
 </head>
-<body class="bg-light p-4">
-<div class="container">
-    <h3 class="mb-4">🕒 ثبت / ویرایش شیفت</h3>
+<body class="bg-light">
 
-    <form th:action="@{/shift/save}" th:object="${shift}" method="post" class="card p-4 shadow-sm bg-white">
+<div class="container mt-4">
+    <div class="text-end mb-4">
+        <h3 th:if="${shift.id == null}">ثبت گزارش جدید</h3>
+        <h3 th:unless="${shift.id == null}">ویرایش گزارش شماره <span th:text="${shift.id}"></span></h3>
+    </div>
 
-        <div class="mb-3">
-            <label class="form-label">زمان شروع:</label>
-            <input type="datetime-local" class="form-control" th:field="*{startTime}" required>
+    <form th:action="@{/shift/save}" th:object="${shift}" method="post" class="row g-3" id="shiftForm">
+        <input type="hidden" th:field="*{id}" />
+        <input type="hidden" th:field="*{operatorName}" />
+
+        <div class="col-md-6">
+            <label for="startTime" class="form-label">زمان شروع</label>
+            <input type="datetime-local" id="startTime" class="form-control" th:field="*{startTime}" readonly />
         </div>
 
-        <div class="mb-3">
-            <label class="form-label">زمان پایان:</label>
-            <input type="datetime-local" class="form-control" th:field="*{endTime}" required>
+        <div class="col-md-6">
+            <label for="endTime" class="form-label">زمان پایان</label>
+            <input type="datetime-local" id="endTime" class="form-control" th:field="*{endTime}" readonly />
         </div>
 
-        <div class="mb-3">
-            <label class="form-label">نام اپراتور:</label>
-            <!-- نمایش نام اپراتور به صورت فقط خواندنی -->
-            <input type="text" class="form-control" th:value="*{operatorName}" readonly>
-            <!-- مقدار نام اپراتور به صورت مخفی برای ارسال به سرور -->
-            <input type="hidden" th:field="*{operatorName}" />
+        <div class="col-md-4">
+            <label for="powerGenerated" class="form-label">توان تولیدی (کیلووات ساعت)</label>
+            <input type="number" step="0.01" id="powerGenerated" class="form-control" th:field="*{powerGenerated}" required />
         </div>
 
-        <div class="mb-3">
-            <label class="form-label">توان تولید شده (کیلووات):</label>
-            <input type="number" step="0.01" class="form-control" th:field="*{powerGenerated}">
+        <div class="col-md-4">
+            <label for="gasConsumed" class="form-label">مصرف گاز (مترمکعب)</label>
+            <input type="number" step="0.01" id="gasConsumed" class="form-control" th:field="*{gasConsumed}" required />
         </div>
 
-        <div class="mb-3">
-            <label class="form-label">گاز مصرف شده (متر مکعب):</label>
-            <input type="number" step="0.01" class="form-control" th:field="*{gasConsumed}">
+        <div class="col-md-4">
+            <label for="efficiency" class="form-label">راندمان (%)</label>
+            <input type="number" step="0.01" id="efficiency" name="efficiency"
+                   class="form-control"
+                   th:value="${shift.efficiency != null} ? ${shift.efficiency * 100} : ''"
+                   required />
         </div>
 
-        <button type="submit" class="btn btn-success">💾 ذخیره</button>
-        <a href="/shift/list" class="btn btn-secondary">بازگشت</a>
+        <div class="col-md-4">
+            <label for="durationMinutes" class="form-label">مدت زمان (دقیقه)</label>
+            <input type="number" id="durationMinutes" class="form-control" th:field="*{durationMinutes}" required />
+        </div>
+
+        <div class="col-md-8">
+            <label class="form-label">نام اپراتور</label>
+            <input type="text" class="form-control" th:value="${shift.operatorName}" readonly />
+        </div>
+
+        <div class="col-12 mt-4 text-end">
+            <!-- دکمه ارسال فرم -->
+            <button type="submit" class="btn btn-primary">✏️ ویرایش</button>
+            <a href="/shift/list" class="btn btn-secondary">↩ بازگشت</a>
+        </div>
     </form>
 </div>
+
 </body>
 </html>
