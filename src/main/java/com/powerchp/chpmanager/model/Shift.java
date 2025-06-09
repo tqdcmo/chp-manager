@@ -1,6 +1,8 @@
 package com.powerchp.chpmanager.model;
 
 import jakarta.persistence.*;
+import org.springframework.format.annotation.DateTimeFormat;
+
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Objects;
@@ -17,9 +19,11 @@ public class Shift {
     private String operatorName;
 
     @Column(name = "start_time", nullable = false)
+    @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm")
     private LocalDateTime startTime;
 
     @Column(name = "end_time", nullable = false)
+    @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm")
     private LocalDateTime endTime;
 
     @Column(name = "power_generated", nullable = false)
@@ -28,23 +32,31 @@ public class Shift {
     @Column(name = "gas_consumed", nullable = false)
     private Double gasConsumed = 0.0;
 
+    @Column(name = "description", length = 1000)
+    private String description;
+
     // --- Constructors ---
     public Shift() {
         // Default constructor for JPA
     }
 
     public Shift(String operatorName, LocalDateTime startTime, LocalDateTime endTime,
-                 Double powerGenerated, Double gasConsumed) {
+                 Double powerGenerated, Double gasConsumed, String description) {
         setOperatorName(operatorName);
         setStartTime(startTime);
         setEndTime(endTime);
         setPowerGenerated(powerGenerated);
         setGasConsumed(gasConsumed);
+        setDescription(description);
     }
 
     // --- Getters and Setters ---
     public Long getId() {
         return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public String getOperatorName() {
@@ -61,6 +73,9 @@ public class Shift {
 
     public void setStartTime(LocalDateTime startTime) {
         this.startTime = Objects.requireNonNull(startTime, "زمان شروع نمی‌تواند خالی باشد");
+        if (this.endTime != null && this.endTime.isBefore(this.startTime)) {
+            throw new IllegalArgumentException("زمان پایان نمی‌تواند قبل از زمان شروع باشد");
+        }
     }
 
     public LocalDateTime getEndTime() {
@@ -88,6 +103,14 @@ public class Shift {
 
     public void setGasConsumed(Double gasConsumed) {
         this.gasConsumed = gasConsumed != null ? gasConsumed : 0.0;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     // --- Business Logic ---
@@ -133,6 +156,7 @@ public class Shift {
                 ", endTime=" + endTime +
                 ", powerGenerated=" + powerGenerated +
                 ", gasConsumed=" + gasConsumed +
+                ", description='" + description + '\'' +
                 '}';
     }
 }
