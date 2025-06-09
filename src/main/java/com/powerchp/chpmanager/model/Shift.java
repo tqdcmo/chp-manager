@@ -35,12 +35,11 @@ public class Shift {
 
     public Shift(String operatorName, LocalDateTime startTime, LocalDateTime endTime,
                  Double powerGenerated, Double gasConsumed) {
-        this.operatorName = Objects.requireNonNull(operatorName, "Operator name must not be null");
-        this.startTime = Objects.requireNonNull(startTime, "Start time must not be null");
-        this.setEndTime(endTime);  // از متد ست‌تر اصلاح‌شده استفاده می‌کنیم
-
-        this.powerGenerated = powerGenerated != null ? powerGenerated : 0.0;
-        this.gasConsumed = gasConsumed != null ? gasConsumed : 0.0;
+        setOperatorName(operatorName);
+        setStartTime(startTime);
+        setEndTime(endTime);
+        setPowerGenerated(powerGenerated);
+        setGasConsumed(gasConsumed);
     }
 
     // --- Getters and Setters ---
@@ -53,7 +52,7 @@ public class Shift {
     }
 
     public void setOperatorName(String operatorName) {
-        this.operatorName = Objects.requireNonNull(operatorName, "Operator name must not be null");
+        this.operatorName = Objects.requireNonNull(operatorName, "نام اپراتور نمی‌تواند خالی باشد");
     }
 
     public LocalDateTime getStartTime() {
@@ -61,7 +60,7 @@ public class Shift {
     }
 
     public void setStartTime(LocalDateTime startTime) {
-        this.startTime = Objects.requireNonNull(startTime, "Start time must not be null");
+        this.startTime = Objects.requireNonNull(startTime, "زمان شروع نمی‌تواند خالی باشد");
     }
 
     public LocalDateTime getEndTime() {
@@ -69,13 +68,10 @@ public class Shift {
     }
 
     public void setEndTime(LocalDateTime endTime) {
-        Objects.requireNonNull(endTime, "End time must not be null");
-
-        if (this.startTime != null && endTime.isBefore(this.startTime)) {
-            throw new IllegalArgumentException("End time cannot be before start time.");
+        this.endTime = Objects.requireNonNull(endTime, "زمان پایان نمی‌تواند خالی باشد");
+        if (this.startTime != null && this.endTime.isBefore(this.startTime)) {
+            throw new IllegalArgumentException("زمان پایان نمی‌تواند قبل از زمان شروع باشد");
         }
-
-        this.endTime = endTime;
     }
 
     public Double getPowerGenerated() {
@@ -94,24 +90,23 @@ public class Shift {
         this.gasConsumed = gasConsumed != null ? gasConsumed : 0.0;
     }
 
-    // --- Business Logic Methods ---
+    // --- Business Logic ---
     public long getDurationMinutes() {
-        if (startTime == null || endTime == null) {
-            return 0;
-        }
-        return Duration.between(startTime, endTime).toMinutes();
+        return (startTime != null && endTime != null) ?
+                Duration.between(startTime, endTime).toMinutes() : 0;
     }
 
     public double getEfficiency() {
-        return (gasConsumed != null && gasConsumed > 0) ? powerGenerated / gasConsumed : 0.0;
+        return (gasConsumed != null && gasConsumed > 0) ?
+                powerGenerated / gasConsumed : 0.0;
     }
 
-    // --- Entity Lifecycle Callback for Validation ---
+    // --- Entity Lifecycle Validation ---
     @PrePersist
     @PreUpdate
     private void validateTimes() {
         if (startTime != null && endTime != null && endTime.isBefore(startTime)) {
-            throw new IllegalArgumentException("End time cannot be before start time.");
+            throw new IllegalArgumentException("زمان پایان نمی‌تواند قبل از زمان شروع باشد");
         }
     }
 

@@ -14,7 +14,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
-@EnableMethodSecurity // برای استفاده از @PreAuthorize
+@EnableMethodSecurity
 public class SecurityConfig {
 
     private final CustomAuthenticationSuccessHandler successHandler;
@@ -29,9 +29,11 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                .csrf(csrf -> csrf.disable())
+                // اگر API نیستید و فرم دارید، بهتر است CSRF را فعال نگه دارید.
+                // .csrf(csrf -> csrf.disable())
+                .csrf(csrf -> csrf.csrfTokenRepository(org.springframework.security.web.csrf.CookieCsrfTokenRepository.withHttpOnlyFalse()))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/login", "/css/**", "/js/**").permitAll()
+                        .requestMatchers("/login", "/css/**", "/js/**", "/images/**", "/webjars/**").permitAll()
                         .requestMatchers("/employee/add", "/employee/save", "/employee/new").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )
@@ -48,18 +50,17 @@ public class SecurityConfig {
                 )
                 .exceptionHandling(exception -> exception
                         .accessDeniedPage("/access-denied")
-                );
+                )
+                .headers(headers -> headers.frameOptions(frame -> frame.sameOrigin())); // اگر فریم دارید
 
         return http.build();
     }
 
-    // رمزنگاری رمز عبور با BCrypt
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
-    // معرفی Provider سفارشی برای احراز هویت
     @Bean
     public DaoAuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
@@ -68,7 +69,6 @@ public class SecurityConfig {
         return provider;
     }
 
-    // ساخت AuthenticationManager از AuthenticationConfiguration (برای Spring Boot 3)
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
         return config.getAuthenticationManager();

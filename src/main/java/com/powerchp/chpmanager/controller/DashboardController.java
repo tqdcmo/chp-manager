@@ -1,13 +1,15 @@
 package com.powerchp.chpmanager.controller;
 
 import com.powerchp.chpmanager.service.DashboardService;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
-@RequestMapping("/manager")  // مسیر اصلی برای مدیران
+@RequestMapping("/manager")
 public class DashboardController {
 
     private final DashboardService dashboardService;
@@ -16,18 +18,24 @@ public class DashboardController {
         this.dashboardService = dashboardService;
     }
 
-    @GetMapping("/dashboard")  // مسیر کامل: /manager/dashboard
+    @GetMapping("/dashboard")
     public String showDashboard(Model model) {
-        long errorCount = dashboardService.getTodayErrorCount();
-        model.addAttribute("errorCount", errorCount);
+        // دریافت نام اپراتور لاگین شده
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String operatorName = (auth != null) ? auth.getName() : "ناشناس";
 
-        // داده‌های فرضی برای سایر اطلاعات داشبورد
-        model.addAttribute("powerGenerated", 12000);
-        model.addAttribute("gasConsumed", 2500);
-        model.addAttribute("shiftTime", "07:00 - 15:00");
-        model.addAttribute("engine1Status", "فعال");
-        model.addAttribute("engine2Status", "در تعمیر");
+        // اضافه کردن نام اپراتور به مدل
+        model.addAttribute("operatorName", operatorName);
 
-        return "dashboard";  // فایل dashboard.html
+        // اضافه کردن داده‌های داشبورد
+        model.addAttribute("errorCount", dashboardService.getTodayErrorCount());
+        model.addAttribute("powerGenerated", dashboardService.getTodayPowerGenerated());
+        model.addAttribute("gasConsumed", dashboardService.getTodayGasConsumed());
+        model.addAttribute("shiftTime", dashboardService.getCurrentShiftTime());
+        model.addAttribute("engine1Status", dashboardService.getEngineStatus(1));
+        model.addAttribute("engine2Status", dashboardService.getEngineStatus(2));
+
+        return "dashboard";
     }
 }
+
