@@ -18,24 +18,35 @@ public class DashboardController {
         this.dashboardService = dashboardService;
     }
 
+    // متد تبدیل وضعیت انگلیسی به فارسی
+    private String convertStatusToPersian(String status) {
+        if (status == null) return "نامشخص";
+        return switch (status.toUpperCase()) {
+            case "RUNNING" -> "در حال کار";
+            case "STOPPED" -> "خاموش";
+            case "MAINTENANCE" -> "در حال سرویس";
+            default -> "نامشخص";
+        };
+    }
+
     @GetMapping("/dashboard")
     public String showDashboard(Model model) {
-        // دریافت نام اپراتور لاگین شده
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String operatorName = (auth != null) ? auth.getName() : "ناشناس";
 
-        // اضافه کردن نام اپراتور به مدل
         model.addAttribute("operatorName", operatorName);
-
-        // اضافه کردن داده‌های داشبورد
         model.addAttribute("errorCount", dashboardService.getTodayErrorCount());
         model.addAttribute("powerGenerated", dashboardService.getTodayPowerGenerated());
         model.addAttribute("gasConsumed", dashboardService.getTodayGasConsumed());
         model.addAttribute("shiftTime", dashboardService.getCurrentShiftTime());
-        model.addAttribute("engine1Status", dashboardService.getEngineStatus(1));
-        model.addAttribute("engine2Status", dashboardService.getEngineStatus(2));
+
+        // گرفتن وضعیت موتورها از سرویس و تبدیل به فارسی
+        String engine1Status = convertStatusToPersian(dashboardService.getEngineStatus(1));
+        String engine2Status = convertStatusToPersian(dashboardService.getEngineStatus(2));
+
+        model.addAttribute("engine1Status", engine1Status);
+        model.addAttribute("engine2Status", engine2Status);
 
         return "dashboard";
     }
 }
-

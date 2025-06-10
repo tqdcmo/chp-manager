@@ -8,9 +8,8 @@
 
         body {
             font-family: 'Vazirmatn', sans-serif;
-            direction: rtl;
-            background-color: #f9fafb;
-            margin: 20px;
+            background-color: #f4f6f8;
+            margin: 30px;
             color: #333;
         }
 
@@ -20,11 +19,32 @@
             margin-bottom: 25px;
         }
 
-        p {
-            max-width: 1200px;
-            margin: 0 auto 20px auto;
+        p.user-info {
+            text-align: center;
             font-weight: 600;
             font-size: 1.1rem;
+            margin-bottom: 20px;
+        }
+
+        .flash-message {
+            max-width: 1200px;
+            margin: 10px auto 25px auto;
+            padding: 12px 20px;
+            border-radius: 6px;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .flash-message.success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .flash-message.error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
         }
 
         .table-wrapper {
@@ -34,28 +54,29 @@
         table {
             width: 100%;
             max-width: 1200px;
-            margin: 0 auto 30px auto;
+            margin: auto;
             border-collapse: collapse;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            background-color: #fff;
             border-radius: 8px;
             overflow: hidden;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-            background-color: #fff;
         }
 
         th, td {
-            padding: 12px 18px;
+            padding: 14px 18px;
             text-align: center;
-            border-bottom: 1px solid #e1e4e8;
+            border-bottom: 1px solid #e0e0e0;
+            vertical-align: middle;
         }
 
         thead th {
-            background-color: #4a90e2;
-            color: white;
+            background-color: #1976d2;
+            color: #fff;
             font-weight: bold;
         }
 
         tbody tr:hover {
-            background-color: #f1f8ff;
+            background-color: #f0f8ff;
         }
 
         .actions {
@@ -68,48 +89,89 @@
         .actions a,
         .actions button {
             padding: 6px 12px;
-            border-radius: 5px;
-            font-weight: 600;
+            border-radius: 6px;
+            font-weight: 500;
             font-size: 0.9rem;
-            transition: background-color 0.3s ease;
+            transition: background-color 0.2s ease;
             color: white;
             border: none;
             cursor: pointer;
             text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 6px;
         }
 
-        .report { background-color: #2ecc71; }
-        .report:hover { background-color: #27ae60; }
+        .actions a:focus,
+        .actions button:focus {
+            outline: 2px solid #333;
+            outline-offset: 2px;
+        }
 
-        .edit { background-color: #f39c12; }
-        .edit:hover { background-color: #d68910; }
+        .report {
+            background-color: #2ecc71;
+        }
+        .report:hover {
+            background-color: #27ae60;
+        }
 
-        .delete { background-color: #e74c3c; }
-        .delete:hover { background-color: #c0392b; }
+        .edit {
+            background-color: #f39c12;
+        }
+        .edit:hover {
+            background-color: #e67e22;
+        }
 
-        p.links {
+        .delete {
+            background-color: #e74c3c;
+        }
+        .delete:hover {
+            background-color: #c0392b;
+        }
+
+        .no-shift {
             text-align: center;
+            padding: 24px;
+            font-size: 1rem;
+            color: #999;
+        }
+
+        .nav-links {
+            text-align: center;
+            margin-top: 30px;
             font-size: 1rem;
         }
 
-        p.links a {
-            color: #4a90e2;
-            text-decoration: none;
-            font-weight: 600;
+        .nav-links a {
             margin: 0 12px;
+            color: #1976d2;
+            font-weight: 600;
+            text-decoration: none;
         }
 
-        p.links a:hover {
-            color: #2c3e50;
+        .nav-links a:hover {
             text-decoration: underline;
         }
     </style>
+
+    <!-- فونت آیکون Font Awesome -->
+    <link
+            rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+            integrity="sha512-pVUu+qJKI+NcG+ScijjiCtOywxLlA4JsmMF9MfV6Jq6fTR8x4GogVpr6kquEo9pG04qZ1OaTZPqP+Q+6Nk+7wg=="
+            crossorigin="anonymous"
+            referrerpolicy="no-referrer"
+    />
 </head>
 <body>
 
 <h2>لیست شیفت‌ها</h2>
 
-<p>کاربر جاری: <span th:text="${currentUser}">کاربر</span></p>
+<p class="user-info">کاربر جاری: <span th:text="${currentUser}">کاربر</span></p>
+
+<!-- پیام‌های موفقیت و خطا -->
+<div th:if="${message}" class="flash-message success" th:text="${message}"></div>
+<div th:if="${error}" class="flash-message error" th:text="${error}"></div>
 
 <div class="table-wrapper">
     <table>
@@ -127,38 +189,48 @@
         </tr>
         </thead>
         <tbody>
-        <tr th:each="shift : ${shifts}">
-            <td th:text="${shift.id}">1</td>
+        <tr th:each="shift, iterStat : ${shifts}">
+            <td th:text="${iterStat.count}">1</td>
             <td th:text="${shift.operatorName}">اپراتور</td>
             <td th:text="${#temporals.format(shift.startTime, 'yyyy/MM/dd HH:mm')}">شروع</td>
             <td th:text="${#temporals.format(shift.endTime, 'yyyy/MM/dd HH:mm')}">پایان</td>
             <td th:text="${shift.powerGenerated ?: 0}">100</td>
             <td th:text="${shift.gasConsumed ?: 0}">50</td>
-            <td th:text="${#numbers.formatDecimal(shift.efficiency * 100, 1, 2) + '٪'}">90٪</td>
+            <td th:text="${#numbers.formatDecimal(shift.efficiency * 100, 1, 2) + '٪'}">80٪</td>
             <td th:text="${shift.durationMinutes ?: 0}">60</td>
             <td class="actions">
-                <a th:href="@{/shift/report/{id}(id=${shift.id})}" target="_blank" class="report">گزارش PDF</a>
+                <a th:href="@{/shift/report/{id}(id=${shift.id})}" target="_blank" class="report" title="گزارش PDF" >
+                    <i class="fa-solid fa-file-pdf"></i> گزارش PDF
+                </a>
 
                 <span th:if="${isAdmin or (shift.operatorName == currentUser)}">
-                    <a th:href="@{/shift/edit/{id}(id=${shift.id})}" class="edit">ویرایش</a>
-                    <form th:action="@{/shift/delete/{id}(id=${shift.id})}" method="post" style="display:inline;" onsubmit="return confirm('آیا مطمئن هستید؟');">
-                        <button type="submit" class="delete">حذف</button>
+                    <a th:href="@{/shift/edit/{id}(id=${shift.id})}" class="edit" title="ویرایش">
+                        <i class="fa-solid fa-pen-to-square"></i> ویرایش
+                    </a>
+                    <form th:action="@{/shift/delete/{id}(id=${shift.id})}" method="post"
+                          style="display:inline;"
+                          onsubmit="return confirm('آیا مطمئن هستید که می‌خواهید این شیفت را حذف کنید؟');">
+                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                        <button type="submit" class="delete" title="حذف">
+                            <i class="fa-solid fa-trash"></i> حذف
+                        </button>
                     </form>
                 </span>
             </td>
         </tr>
+
         <tr th:if="${#lists.isEmpty(shifts)}">
-            <td colspan="9">هیچ شیفتی یافت نشد.</td>
+            <td colspan="9" class="no-shift">هیچ شیفتی یافت نشد.</td>
         </tr>
         </tbody>
     </table>
 </div>
 
-<p class="links">
-    <a href="/shift/new">ایجاد شیفت جدید</a> |
-    <a href="/shift/list">نمایش همه گزارش‌ها</a> |
-    <a href="/shift/my">شیفت‌های من</a>
-</p>
+<div class="nav-links">
+    <a th:href="@{/shift/my}">شیفت‌های من</a>
+    <a th:href="@{/shift}">همه شیفت‌ها</a>
+    <a th:href="@{/shift/new}" th:if="${isAdmin}">ایجاد شیفت جدید</a>
+</div>
 
 </body>
 </html>

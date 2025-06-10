@@ -9,7 +9,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface ProductionRecordRepository extends JpaRepository<ProductionRecord, Long> {
 
-    @Query("SELECT SUM(pr.amount) FROM ProductionRecord pr WHERE pr.shift.id = :shiftId")
+    @Query("SELECT SUM(pr.powerGenerated) FROM ProductionRecord pr WHERE pr.shift.id = :shiftId")
     Double sumPowerGeneratedByShiftId(@Param("shiftId") Long shiftId);
 
     @Query("SELECT SUM(pr.gasConsumed) FROM ProductionRecord pr WHERE pr.shift.id = :shiftId")

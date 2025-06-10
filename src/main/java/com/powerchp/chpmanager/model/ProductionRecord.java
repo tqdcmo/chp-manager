@@ -5,21 +5,26 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 
 @Entity
+@Table(name = "production_records")
 public class ProductionRecord {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private double powerGenerated; // به kWh
+    private double powerGenerated;
 
-    private double gasConsumed; // به m³
+    private double gasConsumed;
 
     private LocalDate date;
 
     private LocalTime time;
 
-    // --- Getters and Setters ---
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "shift_id", nullable = false)
+    private Shift shift;
+
+    // Getters and Setters
 
     public Long getId() {
         return id;
@@ -59,5 +64,13 @@ public class ProductionRecord {
 
     public void setTime(LocalTime time) {
         this.time = time;
+    }
+
+    public Shift getShift() {
+        return shift;
+    }
+
+    public void setShift(Shift shift) {
+        this.shift = shift;
     }
 }
