@@ -48,7 +48,6 @@ public class ShiftController {
         return "redirect:/shift/my";
     }
 
-    // --- اصلاح شده: همه می توانند همه شیفت‌ها را ببینند ---
     @GetMapping("/list")
     public String listAllShifts(Model model, Principal principal, Authentication auth) {
         if (principal == null || auth == null) return "redirect:/login";
@@ -58,9 +57,8 @@ public class ShiftController {
         model.addAttribute("currentUser", principal.getName());
         model.addAttribute("isAdmin", isAdmin(auth));
 
-        return "shift_list";  // قالب یکسان با myShifts
+        return "shift_list";
     }
-
 
     @GetMapping("/my")
     public String listMyShifts(Model model, Principal principal, Authentication auth) {
@@ -73,11 +71,10 @@ public class ShiftController {
 
         model.addAttribute("shifts", shifts);
         model.addAttribute("currentUser", currentUser);
-        model.addAttribute("isAdmin", isAdmin(auth)); // فرض می‌کنیم این متد شما راستی‌آزمایی نقش ادمین را انجام می‌دهد
+        model.addAttribute("isAdmin", isAdmin(auth));
 
-        return "shift_list";  // نام قالب Thymeleaf
+        return "shift_list";
     }
-
 
     @GetMapping("/new")
     public String showCreateForm(Model model, Principal principal) {
@@ -155,6 +152,7 @@ public class ShiftController {
         return "redirect:/shift/my";
     }
 
+    // ✅ همه کاربران وارد شده می‌توانند گزارش PDF هر شیفتی را دانلود کنند
     @GetMapping("/report/{id}")
     public void generatePdfReport(@PathVariable Long id, Principal principal, Authentication auth, HttpServletResponse response) throws IOException {
         if (principal == null || auth == null) {
@@ -165,11 +163,6 @@ public class ShiftController {
         Shift shift = shiftService.findById(id);
         if (shift == null) {
             response.sendError(HttpServletResponse.SC_NOT_FOUND, "گزارش یافت نشد.");
-            return;
-        }
-
-        if (!isAuthorized(shift, principal.getName(), isAdmin(auth))) {
-            response.sendError(HttpServletResponse.SC_FORBIDDEN, "دسترسی غیرمجاز به دریافت گزارش.");
             return;
         }
 

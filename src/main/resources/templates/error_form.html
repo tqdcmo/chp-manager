@@ -1,13 +1,13 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" lang="fa" dir="rtl">
 <head>
     <meta charset="UTF-8" />
     <title>ثبت / ویرایش گزارش خطا</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
 </head>
 <body class="bg-light p-4">
-<div class="container">
-    <h3 class="mb-4 text-danger">⚠ ثبت / ویرایش گزارش خطا</h3>
+<div class="container" style="max-width: 700px;">
+    <h3 class="mb-4 text-danger text-center">⚠ ثبت / ویرایش گزارش خطا</h3>
 
     <form th:action="@{/error/save}" th:object="${errorReport}" method="post" class="card p-4 shadow-sm bg-white">
 
@@ -16,52 +16,52 @@
 
         <!-- زمان گزارش -->
         <div class="mb-3">
-            <label class="form-label">⏱ زمان گزارش:</label>
-            <input type="datetime-local" class="form-control" th:field="*{reportTime}" required />
+            <label for="reportTime" class="form-label">⏱ زمان گزارش:</label>
+            <input id="reportTime" type="datetime-local" class="form-control" th:field="*{reportTime}" required />
         </div>
 
         <!-- نام اپراتور -->
         <div class="mb-3">
-            <label class="form-label">👷 نام اپراتور:</label>
-            <input type="text" class="form-control" th:value="*{operatorName}" readonly />
-            <input type="hidden" th:field="*{operatorName}" />
+            <label for="operatorName" class="form-label">👷 نام اپراتور:</label>
+            <input id="operatorName" type="text" class="form-control" th:field="*{operatorName}" readonly />
         </div>
 
         <!-- شرح خطا -->
         <div class="mb-3">
-            <label class="form-label">📝 شرح خطا:</label>
-            <textarea class="form-control" th:field="*{errorDescription}" rows="3" required></textarea>
+            <label for="errorDescription" class="form-label">📝 شرح خطا:</label>
+            <textarea id="errorDescription" class="form-control" th:field="*{errorDescription}" rows="3" required placeholder="شرح کامل خطا را وارد کنید..."></textarea>
         </div>
 
         <!-- علت خطا -->
         <div class="mb-3">
-            <label class="form-label">❗ علت خطا:</label>
-            <textarea class="form-control" th:field="*{errorCause}" rows="2" placeholder="علت احتمالی خطا..."></textarea>
+            <label for="errorCause" class="form-label">❗ علت خطا:</label>
+            <textarea id="errorCause" class="form-control" th:field="*{errorCause}" rows="2" placeholder="علت احتمالی خطا را وارد کنید..."></textarea>
         </div>
 
         <!-- نحوه رفع خطا -->
         <div class="mb-3">
-            <label class="form-label">✅ نحوه رفع خطا:</label>
-            <textarea class="form-control" th:field="*{resolutionMethod}" rows="2" placeholder="اقدامات انجام‌شده برای رفع..."></textarea>
+            <label for="resolutionMethod" class="form-label">✅ نحوه رفع خطا:</label>
+            <textarea id="resolutionMethod" class="form-control" th:field="*{resolutionMethod}" rows="2" placeholder="اقدامات انجام‌شده برای رفع خطا..."></textarea>
         </div>
 
         <!-- مدت زمان خطا -->
         <div class="mb-3">
-            <label class="form-label">⏳ مدت زمان خطا (دقیقه):</label>
-            <input type="number" class="form-control" th:field="*{errorDurationMinutes}" min="0" placeholder="مثلاً: 45" />
+            <label for="errorDurationMinutes" class="form-label">⏳ مدت زمان خطا (دقیقه):</label>
+            <input id="errorDurationMinutes" type="number" class="form-control" th:field="*{errorDurationMinutes}" min="0" placeholder="مثلاً: 45" />
         </div>
 
         <!-- شدت خطا -->
         <div class="mb-3">
-            <label class="form-label">🚨 شدت خطا:</label>
-            <select class="form-select" th:field="*{severity}" required>
-                <option value="" disabled th:selected="*{severity} == null">انتخاب کنید</option>
+            <label for="severity" class="form-label">🚨 شدت خطا:</label>
+            <select id="severity" class="form-select" th:field="*{errorSeverity}" required>
+                <option value="" disabled th:selected="${errorSeverity == null}">انتخاب کنید</option>
                 <option value="کم">کم</option>
                 <option value="متوسط">متوسط</option>
                 <option value="زیاد">زیاد</option>
                 <option value="بحرانی">بحرانی</option>
             </select>
         </div>
+
 
         <!-- دکمه‌ها -->
         <div class="d-flex justify-content-between">

@@ -11,38 +11,44 @@ public class ErrorReport {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false)
     private String operatorName;
 
+    @Column(nullable = false)
     private LocalDateTime reportTime;
 
+    @Column(length = 1000)
     private String errorDescription;
 
-    private String severity;
+    @Column(name = "severity", nullable = false)
+    private String errorSeverity;
 
-    // 🆕 New fields
+    @Column(length = 1000)
     private String errorCause;
 
+    @Column(length = 1000)
     private String resolutionMethod;
 
     private Integer errorDurationMinutes;
 
-    // Constructors
     public ErrorReport() {
+        this.reportTime = LocalDateTime.now();
     }
 
     public ErrorReport(String operatorName, LocalDateTime reportTime,
-                       String errorDescription, String severity,
+                       String errorDescription, String errorSeverity,
                        String errorCause, String resolutionMethod, Integer errorDurationMinutes) {
         this.operatorName = operatorName;
         this.reportTime = reportTime;
         this.errorDescription = errorDescription;
-        this.severity = severity;
+        this.errorSeverity = errorSeverity;
         this.errorCause = errorCause;
         this.resolutionMethod = resolutionMethod;
         this.errorDurationMinutes = errorDurationMinutes;
     }
 
-    // Getters and Setters
+    // Getter و Setter ها
+
     public Long getId() {
         return id;
     }
@@ -75,12 +81,12 @@ public class ErrorReport {
         this.errorDescription = errorDescription;
     }
 
-    public String getSeverity() {
-        return severity;
+    public String getErrorSeverity() {
+        return errorSeverity;
     }
 
-    public void setSeverity(String severity) {
-        this.severity = severity;
+    public void setErrorSeverity(String errorSeverity) {
+        this.errorSeverity = errorSeverity;
     }
 
     public String getErrorCause() {
