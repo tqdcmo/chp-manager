@@ -30,12 +30,14 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
+                // فعال‌سازی CSRF با توکن ذخیره‌شده در کوکی
                 .csrf(csrf -> csrf
                         .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
                 )
 
+                // تعریف مجوزهای دسترسی
                 .authorizeHttpRequests(auth -> auth
-                        // دسترسی عمومی
+                        // مسیرهای عمومی
                         .requestMatchers("/login", "/css/**", "/js/**", "/images/**", "/webjars/**").permitAll()
 
                         // فقط ادمین‌ها به مدیریت کارمندان دسترسی دارند
@@ -44,13 +46,14 @@ public class SecurityConfig {
                         // مشاهده گزارش شیفت برای همه کاربران احراز هویت‌شده
                         .requestMatchers("/shifts", "/shifts/{id}", "/shifts/pdf/**").hasAnyRole("OPERATOR", "ADMIN")
 
-                        // ثبت، ویرایش، حذف گزارش شیفت: بررسی دستی در کنترلر انجام می‌شود، فقط باید لاگین کرده باشد
+                        // ثبت، ویرایش، حذف گزارش شیفت: فقط احراز هویت کافی است
                         .requestMatchers("/shifts/new", "/shifts/edit/**", "/shifts/delete/**").authenticated()
 
-                        // سایر مسیرها نیاز به احراز هویت دارند
+                        // سایر مسیرها
                         .anyRequest().authenticated()
                 )
 
+                // تنظیمات فرم لاگین
                 .formLogin(form -> form
                         .loginPage("/login")
                         .loginProcessingUrl("/login")
@@ -58,38 +61,36 @@ public class SecurityConfig {
                         .permitAll()
                 )
 
+                // تنظیمات خروج
                 .logout(logout -> logout
                         .logoutUrl("/logout")
                         .logoutSuccessUrl("/login?logout")
                         .permitAll()
                 )
 
+                // تنظیمات خطای دسترسی
                 .exceptionHandling(ex -> ex
                         .accessDeniedPage("/access-denied")
-                )
-
-                .headers(headers -> headers
-                        .frameOptions(frame -> frame.sameOrigin())
                 );
 
         return http.build();
     }
 
     @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
+        return config.getAuthenticationManager();
     }
 
     @Bean
     public DaoAuthenticationProvider authenticationProvider() {
-        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
-        authProvider.setUserDetailsService(customUserDetailsService);
-        authProvider.setPasswordEncoder(passwordEncoder());
-        return authProvider;
+        DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
+        provider.setUserDetailsService(customUserDetailsService);
+        provider.setPasswordEncoder(passwordEncoder());
+        return provider;
     }
 
     @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
-        return config.getAuthenticationManager();
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
     }
 }

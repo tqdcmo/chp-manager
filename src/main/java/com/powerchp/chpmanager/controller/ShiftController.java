@@ -62,9 +62,7 @@ public class ShiftController {
 
     @GetMapping("/my")
     public String listMyShifts(Model model, Principal principal, Authentication auth) {
-        if (principal == null || auth == null) {
-            return "redirect:/login";
-        }
+        if (principal == null || auth == null) return "redirect:/login";
 
         String currentUser = principal.getName();
         List<Shift> shifts = shiftService.findShiftsByOperatorName(currentUser);
@@ -89,6 +87,11 @@ public class ShiftController {
         return "shift_form";
     }
 
+    private double calculateEfficiency(double powerGenerated, double gasConsumed) {
+        if (gasConsumed <= 0) return 0.0;
+        return powerGenerated / gasConsumed;
+    }
+
     @PostMapping("/save")
     public String saveShift(@ModelAttribute Shift shift, Principal principal, Authentication auth, RedirectAttributes redirectAttributes) {
         if (principal == null || auth == null) return "redirect:/login";
@@ -104,6 +107,8 @@ public class ShiftController {
         }
 
         if (shift.getId() == null) {
+            // محاسبه راندمان
+            shift.setEfficiency(calculateEfficiency(shift.getPowerGenerated(), shift.getGasConsumed()));
             shiftService.saveShift(shift);
             redirectAttributes.addFlashAttribute("successMessage", "شیفت جدید با موفقیت ثبت شد.");
         } else {
@@ -116,6 +121,7 @@ public class ShiftController {
             existing.setEndTime(shift.getEndTime());
             existing.setPowerGenerated(shift.getPowerGenerated());
             existing.setGasConsumed(shift.getGasConsumed());
+            existing.setEfficiency(calculateEfficiency(shift.getPowerGenerated(), shift.getGasConsumed()));
             shiftService.saveShift(existing);
             redirectAttributes.addFlashAttribute("successMessage", "شیفت با موفقیت به‌روزرسانی شد.");
         }
@@ -152,7 +158,6 @@ public class ShiftController {
         return "redirect:/shift/my";
     }
 
-    // ✅ همه کاربران وارد شده می‌توانند گزارش PDF هر شیفتی را دانلود کنند
     @GetMapping("/report/{id}")
     public void generatePdfReport(@PathVariable Long id, Principal principal, Authentication auth, HttpServletResponse response) throws IOException {
         if (principal == null || auth == null) {

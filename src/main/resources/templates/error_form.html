@@ -1,75 +1,300 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="fa" dir="rtl">
+<html lang="fa" dir="rtl">
 <head>
-    <meta charset="UTF-8" />
-    <title>ثبت / ویرایش گزارش خطا</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>سیستم گزارش خطا</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.3/font/bootstrap-icons.css">
+    <style>
+        :root {
+            --primary-color: #4361ee;
+            --secondary-color: #3f37c9;
+            --success-color: #4cc9f0;
+            --danger-color: #f72585;
+            --warning-color: #f8961e;
+            --light-color: #f8f9fa;
+            --dark-color: #212529;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4e7f1 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .error-form-container {
+            max-width: 800px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            margin: 2rem auto;
+        }
+
+        .form-header {
+            background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 1.5rem;
+            text-align: center;
+        }
+
+        .form-header h2 {
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .form-header p {
+            opacity: 0.9;
+            margin-bottom: 0;
+        }
+
+        .form-body {
+            padding: 2rem;
+        }
+
+        .form-label {
+            font-weight: 600;
+            color: var(--dark-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .form-control, .form-select {
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            border: 2px solid #e2e8f0;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.25rem rgba(67, 97, 238, 0.25);
+        }
+
+        .input-group-text {
+            background-color: #e9ecef;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px 0 0 8px;
+        }
+
+        .form-control[readonly] {
+            background-color: #f8f9fa;
+        }
+
+        textarea.form-control {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .btn-submit {
+            background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+            border: none;
+            padding: 0.75rem 2rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(67, 97, 238, 0.3);
+        }
+
+        .btn-back {
+            background: #6c757d;
+            border: none;
+            padding: 0.75rem 2rem;
+            font-weight: 600;
+        }
+
+        .severity-badge {
+            display: inline-block;
+            padding: 0.35em 0.65em;
+            border-radius: 50rem;
+            font-weight: 600;
+            font-size: 0.875em;
+        }
+
+        .severity-low { background-color: #d1e7dd; color: #0f5132; }
+        .severity-medium { background-color: #fff3cd; color: #664d03; }
+        .severity-high { background-color: #f8d7da; color: #842029; }
+        .severity-critical { background-color: #dc3545; color: white; }
+
+        .form-section {
+            margin-bottom: 1.5rem;
+            padding: 1.25rem;
+            border-radius: 10px;
+            background-color: #f8fafc;
+            border-left: 4px solid var(--primary-color);
+        }
+
+        .form-section h5 {
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px dashed #dee2e6;
+        }
+
+        .icon-container {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background-color: rgba(67, 97, 238, 0.1);
+            color: var(--primary-color);
+            margin-left: 10px;
+        }
+
+        @media (max-width: 768px) {
+            .form-body {
+                padding: 1.5rem;
+            }
+        }
+    </style>
 </head>
-<body class="bg-light p-4">
-<div class="container" style="max-width: 700px;">
-    <h3 class="mb-4 text-danger text-center">⚠ ثبت / ویرایش گزارش خطا</h3>
-
-    <form th:action="@{/error/save}" th:object="${errorReport}" method="post" class="card p-4 shadow-sm bg-white">
-
-        <!-- Hidden ID field -->
-        <input type="hidden" th:field="*{id}" />
-
-        <!-- زمان گزارش -->
-        <div class="mb-3">
-            <label for="reportTime" class="form-label">⏱ زمان گزارش:</label>
-            <input id="reportTime" type="datetime-local" class="form-control" th:field="*{reportTime}" required />
+<body>
+<div class="container py-4">
+    <div class="error-form-container">
+        <div class="form-header">
+            <h2><i class="bi bi-bug-fill me-2"></i>سیستم ثبت گزارش خطا</h2>
+            <p>فرم زیر را برای ثبت خطاهای فنی تکمیل نمایید</p>
         </div>
 
-        <!-- نام اپراتور -->
-        <div class="mb-3">
-            <label for="operatorName" class="form-label">👷 نام اپراتور:</label>
-            <input id="operatorName" type="text" class="form-control" th:field="*{operatorName}" readonly />
+        <div class="form-body">
+            <form th:action="@{/error/save}" th:object="${errorReport}" method="post">
+                <!-- بخش اطلاعات پایه -->
+                <div class="form-section">
+                    <h5><i class="bi bi-info-circle me-2"></i>اطلاعات پایه</h5>
+
+                    <div class="row">
+                        <!-- اپراتور -->
+                        <div class="col-md-6 mb-3">
+                            <label for="operatorName" class="form-label">
+                                <span class="icon-container"><i class="bi bi-person-badge"></i></span>
+                                نام اپراتور:
+                            </label>
+                            <input type="text" id="operatorName" class="form-control"
+                                   th:field="*{operatorName}" placeholder="نام اپراتور را وارد کنید..." required>
+                        </div>
+
+                        <!-- زمان ثبت گزارش -->
+                        <div class="col-md-6 mb-3">
+                            <label for="reportTime" class="form-label">
+                                <span class="icon-container"><i class="bi bi-calendar-check"></i></span>
+                                زمان ثبت گزارش:
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-clock"></i></span>
+                                <input type="datetime-local" id="reportTime" class="form-control"
+                                       th:field="*{reportTime}" readonly>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- بخش توضیحات خطا -->
+                <div class="form-section">
+                    <h5><i class="bi bi-exclamation-triangle me-2"></i>مشخصات خطا</h5>
+
+                    <div class="mb-3">
+                        <label for="errorDescription" class="form-label">
+                            <span class="icon-container"><i class="bi bi-card-text"></i></span>
+                            توضیح خطا:
+                        </label>
+                        <textarea id="errorDescription" class="form-control" th:field="*{errorDescription}"
+                                  rows="3" placeholder="شرح مختصری از خطا..."></textarea>
+                    </div>
+
+                    <div class="row">
+                        <!-- علت خطا -->
+                        <div class="col-md-6 mb-3">
+                            <label for="errorCause" class="form-label">
+                                <span class="icon-container"><i class="bi bi-question-circle"></i></span>
+                                علت خطا:
+                            </label>
+                            <textarea id="errorCause" class="form-control" th:field="*{errorCause}"
+                                      rows="3" placeholder="علت احتمالی خطا را وارد کنید..."></textarea>
+                        </div>
+
+                        <!-- نحوه رفع خطا -->
+                        <div class="col-md-6 mb-3">
+                            <label for="resolutionMethod" class="form-label">
+                                <span class="icon-container"><i class="bi bi-check-circle"></i></span>
+                                نحوه رفع خطا:
+                            </label>
+                            <textarea id="resolutionMethod" class="form-control" th:field="*{resolutionMethod}"
+                                      rows="3" placeholder="اقدامات انجام‌شده برای رفع خطا..."></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- بخش ارزیابی خطا -->
+                <div class="form-section">
+                    <h5><i class="bi bi-clipboard-data me-2"></i>ارزیابی خطا</h5>
+
+                    <div class="row">
+                        <!-- مدت زمان خطا -->
+                        <div class="col-md-6 mb-3">
+                            <label for="errorDurationMinutes" class="form-label">
+                                <span class="icon-container"><i class="bi bi-stopwatch"></i></span>
+                                مدت زمان خطا (دقیقه):
+                            </label>
+                            <div class="input-group">
+                                <input id="errorDurationMinutes" type="number" class="form-control"
+                                       th:field="*{errorDurationMinutes}" min="0" placeholder="مثلاً: 45">
+                                <span class="input-group-text">دقیقه</span>
+                            </div>
+                        </div>
+
+                        <!-- شدت خطا -->
+                        <div class="col-md-6 mb-3">
+                            <label for="severity" class="form-label">
+                                <span class="icon-container"><i class="bi bi-exclamation-octagon"></i></span>
+                                شدت خطا:
+                            </label>
+                            <select id="severity" class="form-select" th:field="*{errorSeverity}" required>
+                                <option value="" disabled selected>انتخاب سطح شدت خطا</option>
+                                <option value="کم">کم <span class="severity-badge severity-low">Low</span></option>
+                                <option value="متوسط">متوسط <span class="severity-badge severity-medium">Medium</span></option>
+                                <option value="زیاد">زیاد <span class="severity-badge severity-high">High</span></option>
+                                <option value="بحرانی">بحرانی <span class="severity-badge severity-critical">Critical</span></option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- دکمه‌ها -->
+                <div class="d-flex justify-content-between mt-4">
+                    <a href="/error/list" class="btn btn-back">
+                        <i class="bi bi-arrow-right-circle me-2"></i>بازگشت
+                    </a>
+                    <button type="submit" class="btn btn-submit">
+                        <i class="bi bi-save me-2"></i>ذخیره گزارش
+                    </button>
+                </div>
+            </form>
         </div>
+    </div>
 
-        <!-- شرح خطا -->
-        <div class="mb-3">
-            <label for="errorDescription" class="form-label">📝 شرح خطا:</label>
-            <textarea id="errorDescription" class="form-control" th:field="*{errorDescription}" rows="3" required placeholder="شرح کامل خطا را وارد کنید..."></textarea>
-        </div>
-
-        <!-- علت خطا -->
-        <div class="mb-3">
-            <label for="errorCause" class="form-label">❗ علت خطا:</label>
-            <textarea id="errorCause" class="form-control" th:field="*{errorCause}" rows="2" placeholder="علت احتمالی خطا را وارد کنید..."></textarea>
-        </div>
-
-        <!-- نحوه رفع خطا -->
-        <div class="mb-3">
-            <label for="resolutionMethod" class="form-label">✅ نحوه رفع خطا:</label>
-            <textarea id="resolutionMethod" class="form-control" th:field="*{resolutionMethod}" rows="2" placeholder="اقدامات انجام‌شده برای رفع خطا..."></textarea>
-        </div>
-
-        <!-- مدت زمان خطا -->
-        <div class="mb-3">
-            <label for="errorDurationMinutes" class="form-label">⏳ مدت زمان خطا (دقیقه):</label>
-            <input id="errorDurationMinutes" type="number" class="form-control" th:field="*{errorDurationMinutes}" min="0" placeholder="مثلاً: 45" />
-        </div>
-
-        <!-- شدت خطا -->
-        <div class="mb-3">
-            <label for="severity" class="form-label">🚨 شدت خطا:</label>
-            <select id="severity" class="form-select" th:field="*{errorSeverity}" required>
-                <option value="" disabled th:selected="${errorSeverity == null}">انتخاب کنید</option>
-                <option value="کم">کم</option>
-                <option value="متوسط">متوسط</option>
-                <option value="زیاد">زیاد</option>
-                <option value="بحرانی">بحرانی</option>
-            </select>
-        </div>
-
-
-        <!-- دکمه‌ها -->
-        <div class="d-flex justify-content-between">
-            <a href="/error/list" class="btn btn-secondary">بازگشت</a>
-            <button type="submit" class="btn btn-danger">💾 ذخیره</button>
-        </div>
-
-    </form>
+    <div class="text-center mt-4 text-muted">
+        <small>سیستم گزارش خطا - نسخه ۲.۵ | © ۱۴۰۳ کلیه حقوق محفوظ است</small>
+    </div>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // تنظیم زمان فعلی به عنوان مقدار پیش‌فرض
+    document.addEventListener('DOMContentLoaded', function() {
+        const now = new Date();
+        const timezoneOffset = now.getTimezoneOffset() * 60000;
+        const localISOTime = new Date(now - timezoneOffset).toISOString().slice(0, 16);
+
+        const reportTimeField = document.getElementById('reportTime');
+        if (reportTimeField && !reportTimeField.value) {
+            reportTimeField.value = localISOTime;
+        }
+    });
+</script>
 </body>
 </html>

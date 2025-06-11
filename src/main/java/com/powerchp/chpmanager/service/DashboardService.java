@@ -1,6 +1,5 @@
 package com.powerchp.chpmanager.service;
 
-import com.powerchp.chpmanager.model.EngineStatus;
 import com.powerchp.chpmanager.model.Shift;
 import com.powerchp.chpmanager.repository.EngineStatusRepository;
 import com.powerchp.chpmanager.repository.ErrorReportRepository;
@@ -33,22 +32,27 @@ public class DashboardService {
         this.shiftRepository = shiftRepository;
     }
 
-    // تعداد خطاهای امروز
+    // 🔴 تعداد خطاهای امروز
     public long getTodayErrorCount() {
         return errorReportRepository.countTodayErrors();
     }
 
-    // مجموع برق تولیدی امروز
+    // 🔵 مجموع برق تولیدی کل امروز (همه اپراتورها)
     public int getTodayPowerGenerated() {
         return productionRepository.sumPowerGeneratedByDate(LocalDate.now());
     }
 
-    // مجموع گاز مصرفی امروز
+    // 🟢 مجموع برق تولیدی امروز فقط برای اپراتور فعلی
+    public int getTodayPowerGeneratedByOperator(String operatorUsername) {
+        return productionRepository.sumPowerGeneratedByDateAndOperator(LocalDate.now(), operatorUsername);
+    }
+
+    // 🟡 مجموع گاز مصرفی امروز
     public int getTodayGasConsumed() {
         return productionRepository.sumGasConsumedByDate(LocalDate.now());
     }
 
-    // وضعیت آخر موتور
+    // ⚙️ وضعیت آخر موتور
     public String getEngineStatus(int engineNumber) {
         return engineStatusRepository
                 .findTopByEngineNumberOrderByDateDescTimeDesc(engineNumber)
@@ -56,8 +60,7 @@ public class DashboardService {
                 .orElse("نامشخص");
     }
 
-
-    // زمان شیفت جاری
+    // ⏱️ زمان شیفت جاری
     public String getCurrentShiftTime() {
         List<Shift> shifts = shiftRepository.findCurrentShifts(LocalDateTime.now());
 
@@ -70,5 +73,10 @@ public class DashboardService {
         Shift shift = shifts.get(0);
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm");
         return shift.getStartTime().format(formatter) + " - " + shift.getEndTime().format(formatter);
+    }
+
+    // متد نمونه برای گرفتن برق تولیدی در یک بازه زمانی برای اپراتور (اختیاری)
+    public int getPowerGeneratedForOperatorBetween(LocalDate startDate, LocalDate endDate, String operatorUsername) {
+        return productionRepository.sumPowerGeneratedBetweenDatesAndOperator(startDate, endDate, operatorUsername);
     }
 }

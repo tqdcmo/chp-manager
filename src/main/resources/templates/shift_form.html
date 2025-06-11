@@ -4,87 +4,154 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title th:text="${shift.id == null} ? 'ثبت گزارش جدید' : 'ویرایش گزارش'">فرم گزارش</title>
+
+    <!-- CSS Dependencies -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css" rel="stylesheet" />
-    <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazir-font@v30.1.0/dist/font-face.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet" />
+
     <style>
         body {
             font-family: 'Vazirmatn', sans-serif;
-            background-color: #f8f9fa;
+            background: #f4f6f8;
+            padding: 30px;
         }
 
+        .form-container {
+            max-width: 960px;
+            margin: auto;
+            background: #fff;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.08);
+        }
 
-        label {
+        .form-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .form-header h2 {
+            font-weight: 800;
+            color: #1976d2;
+        }
+
+        .form-label {
             font-weight: bold;
         }
 
-        input[readonly] {
-            background-color: #e9ecef;
+        .form-footer {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            margin-top: 30px;
+        }
+
+        .btn {
+            font-weight: bold;
+        }
+
+        .input-group-text {
+            min-width: 50px;
         }
     </style>
 </head>
 <body>
 
-<div class="container mt-5">
-    <div class="text-end mb-4">
-        <h3 th:if="${shift.id == null}">ثبت گزارش جدید</h3>
-        <h3 th:unless="${shift.id == null}">ویرایش گزارش شماره <span th:text="${shift.id}"></span></h3>
+<div class="form-container">
+    <div class="form-header">
+        <h2 th:text="${shift.id == null} ? 'ثبت گزارش جدید' : 'ویرایش گزارش شماره ' + ${shift.id}"></h2>
     </div>
 
-    <form th:action="@{/shift/save}" th:object="${shift}" method="post" class="row g-3">
-
+    <form th:action="@{/shift/save}" th:object="${shift}" method="post" id="shiftForm" class="row g-4">
         <input type="hidden" th:field="*{id}" />
         <input type="hidden" th:field="*{operatorName}" />
 
+        <!-- زمان شروع -->
         <div class="col-md-6">
-            <label for="startTime" class="form-label">زمان شروع</label>
-            <input type="datetime-local" id="startTime" class="form-control"
-                   th:field="*{startTime}"
-                   th:readonly="${shift.id != null}" required />
+            <label class="form-label" for="startTime"><i class="fa fa-play-circle"></i> زمان شروع</label>
+            <input type="datetime-local" id="startTime" class="form-control" th:field="*{startTime}" th:readonly="${shift.id != null}" required />
         </div>
 
+        <!-- زمان پایان -->
         <div class="col-md-6">
-            <label for="endTime" class="form-label">زمان پایان</label>
-            <input type="datetime-local" id="endTime" class="form-control"
-                   th:field="*{endTime}"
-                   th:readonly="${shift.id != null}" required />
+            <label class="form-label" for="endTime"><i class="fa fa-stop-circle"></i> زمان پایان</label>
+            <input type="datetime-local" id="endTime" class="form-control" th:field="*{endTime}" th:readonly="${shift.id != null}" required />
         </div>
 
+        <!-- توان تولیدی -->
         <div class="col-md-4">
-            <label for="powerGenerated" class="form-label">توان تولیدی (کیلووات ساعت)</label>
-            <input type="number" step="0.01" id="powerGenerated" class="form-control" th:field="*{powerGenerated}" required />
+            <label class="form-label" for="powerGenerated"><i class="fa fa-bolt"></i> توان تولیدی</label>
+            <div class="input-group">
+                <span class="input-group-text">kWh</span>
+                <input type="number" step="0.01" id="powerGenerated" class="form-control" th:field="*{powerGenerated}" min="0" required />
+            </div>
         </div>
 
+        <!-- مصرف گاز -->
         <div class="col-md-4">
-            <label for="gasConsumed" class="form-label">مصرف گاز (متر مکعب)</label>
-            <input type="number" step="0.01" id="gasConsumed" class="form-control" th:field="*{gasConsumed}" required />
+            <label class="form-label" for="gasConsumed"><i class="fa fa-fire"></i> مصرف گاز</label>
+            <div class="input-group">
+                <span class="input-group-text">m³</span>
+                <input type="number" step="0.01" id="gasConsumed" class="form-control" th:field="*{gasConsumed}" min="0" required />
+            </div>
         </div>
 
+        <!-- راندمان -->
         <div class="col-md-4">
-            <label for="efficiency" class="form-label">راندمان (%)</label>
-            <input type="number" step="0.01" id="efficiency" name="efficiency"
-                   class="form-control"
-                   th:value="${shift.efficiency != null} ? ${shift.efficiency * 100} : ''"
-                   required />
+            <label class="form-label" for="efficiency"><i class="fa fa-percent"></i> راندمان</label>
+            <div class="input-group">
+                <span class="input-group-text">%</span>
+                <input type="number" step="0.01" id="efficiency" class="form-control" th:field="*{efficiency}" readonly />
+            </div>
         </div>
 
+        <!-- مدت زمان -->
         <div class="col-md-4">
-            <label for="durationMinutes" class="form-label">مدت زمان (دقیقه)</label>
-            <input type="number" id="durationMinutes" class="form-control" th:field="*{durationMinutes}" required />
+            <label class="form-label" for="durationMinutes"><i class="fa fa-hourglass-half"></i> مدت زمان</label>
+            <div class="input-group">
+                <span class="input-group-text">دقیقه</span>
+                <input type="number" id="durationMinutes" class="form-control" th:field="*{durationMinutes}" min="0" required />
+            </div>
         </div>
 
+        <!-- اپراتور -->
         <div class="col-md-8">
-            <label class="form-label">نام اپراتور</label>
+            <label class="form-label"><i class="fa fa-user"></i> نام اپراتور</label>
             <input type="text" class="form-control" th:value="${shift.operatorName}" readonly />
         </div>
 
-        <div class="col-12 mt-4 text-end">
-            <button type="submit" class="btn btn-primary" th:text="${shift.id == null} ? 'ثبت گزارش' : 'ویرایش گزارش'">ثبت</button>
-
-            <a th:href="@{/shift/my}" class="btn btn-secondary" th:if="${shift.id == null}">↩ بازگشت</a>
-            <a th:href="@{/shift/list}" class="btn btn-secondary" th:unless="${shift.id == null}">↩ بازگشت</a>
+        <!-- دکمه‌ها -->
+        <div class="col-12 form-footer">
+            <a th:href="@{/shift/list}" class="btn btn-secondary"><i class="fa fa-arrow-right"></i> بازگشت</a>
+            <button type="submit" class="btn btn-primary"><i class="fa fa-save"></i> ذخیره</button>
         </div>
     </form>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const powerInput = document.getElementById('powerGenerated');
+        const gasInput = document.getElementById('gasConsumed');
+        const efficiencyInput = document.getElementById('efficiency');
+
+        function calculateEfficiency() {
+            const power = parseFloat(powerInput.value);
+            const gas = parseFloat(gasInput.value);
+            const energyPerM3 = 10.55; // kWh per m³
+
+            if (!isNaN(power) && !isNaN(gas) && gas > 0) {
+                const efficiency = (power / (gas * energyPerM3)) * 100;
+                efficiencyInput.value = efficiency.toFixed(2);
+            } else {
+                efficiencyInput.value = '';
+            }
+        }
+
+        powerInput.addEventListener('input', calculateEfficiency);
+        gasInput.addEventListener('input', calculateEfficiency);
+    });
+</script>
 
 </body>
 </html>

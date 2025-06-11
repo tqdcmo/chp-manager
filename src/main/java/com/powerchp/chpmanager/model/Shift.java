@@ -32,6 +32,9 @@ public class Shift {
     @Column(name = "gas_consumed", nullable = false)
     private Double gasConsumed = 0.0;
 
+    @Column(name = "efficiency")
+    private Double efficiency = 0.0;
+
     @Column(name = "description", length = 1000)
     private String description;
 
@@ -48,6 +51,7 @@ public class Shift {
         setPowerGenerated(powerGenerated);
         setGasConsumed(gasConsumed);
         setDescription(description);
+        updateEfficiency();  // خودکار محاسبه راندمان
     }
 
     // --- Getters and Setters ---
@@ -73,9 +77,7 @@ public class Shift {
 
     public void setStartTime(LocalDateTime startTime) {
         this.startTime = Objects.requireNonNull(startTime, "زمان شروع نمی‌تواند خالی باشد");
-        if (this.endTime != null && this.endTime.isBefore(this.startTime)) {
-            throw new IllegalArgumentException("زمان پایان نمی‌تواند قبل از زمان شروع باشد");
-        }
+        validateTimes();
     }
 
     public LocalDateTime getEndTime() {
@@ -84,9 +86,7 @@ public class Shift {
 
     public void setEndTime(LocalDateTime endTime) {
         this.endTime = Objects.requireNonNull(endTime, "زمان پایان نمی‌تواند خالی باشد");
-        if (this.startTime != null && this.endTime.isBefore(this.startTime)) {
-            throw new IllegalArgumentException("زمان پایان نمی‌تواند قبل از زمان شروع باشد");
-        }
+        validateTimes();
     }
 
     public Double getPowerGenerated() {
@@ -105,6 +105,23 @@ public class Shift {
         this.gasConsumed = gasConsumed != null ? gasConsumed : 0.0;
     }
 
+    public Double getEfficiency() {
+        return efficiency != null ? efficiency : 0.0;
+    }
+
+    public void setEfficiency(Double efficiency) {
+        // فقط Controller اجازه دارد این را ست کند
+        this.efficiency = efficiency != null ? efficiency : 0.0;
+    }
+
+    public void updateEfficiency() {
+        if (gasConsumed != null && gasConsumed > 0) {
+            this.efficiency = powerGenerated / gasConsumed;
+        } else {
+            this.efficiency = 0.0;
+        }
+    }
+
     public String getDescription() {
         return description;
     }
@@ -115,13 +132,9 @@ public class Shift {
 
     // --- Business Logic ---
     public long getDurationMinutes() {
-        return (startTime != null && endTime != null) ?
-                Duration.between(startTime, endTime).toMinutes() : 0;
-    }
-
-    public double getEfficiency() {
-        return (gasConsumed != null && gasConsumed > 0) ?
-                powerGenerated / gasConsumed : 0.0;
+        return (startTime != null && endTime != null)
+                ? Duration.between(startTime, endTime).toMinutes()
+                : 0;
     }
 
     // --- Entity Lifecycle Validation ---
@@ -156,6 +169,7 @@ public class Shift {
                 ", endTime=" + endTime +
                 ", powerGenerated=" + powerGenerated +
                 ", gasConsumed=" + gasConsumed +
+                ", efficiency=" + efficiency +
                 ", description='" + description + '\'' +
                 '}';
     }
