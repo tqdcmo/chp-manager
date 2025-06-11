@@ -4,7 +4,10 @@ import com.powerchp.chpmanager.model.Shift;
 import com.powerchp.chpmanager.repository.ShiftRepository;
 import org.springframework.stereotype.Service;
 
+<<<<<<< HEAD
 import java.time.LocalDateTime;
+=======
+>>>>>>> origin/main
 import java.util.List;
 
 @Service
@@ -35,6 +38,7 @@ public class ShiftService {
     public Shift findById(Long id) {
         return shiftRepository.findById(id).orElse(null);
     }
+<<<<<<< HEAD
     public boolean hasOverlappingShift(String operatorName, LocalDateTime start, LocalDateTime end, Long excludeId) {
         return shiftRepository.findByOperatorName(operatorName).stream()
                 .filter(shift -> !shift.getId().equals(excludeId))
@@ -43,4 +47,6 @@ public class ShiftService {
                 );
     }
 
+=======
+>>>>>>> origin/main
 }

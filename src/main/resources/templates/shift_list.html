@@ -8,8 +8,14 @@
 
         body {
             font-family: 'Vazirmatn', sans-serif;
+<<<<<<< HEAD
             background-color: #f4f6f8;
             margin: 30px;
+=======
+            direction: rtl;
+            background-color: #f9fafb;
+            margin: 20px;
+>>>>>>> origin/main
             color: #333;
         }
 
@@ -19,6 +25,7 @@
             margin-bottom: 25px;
         }
 
+<<<<<<< HEAD
         p.user-info {
             text-align: center;
             font-weight: 600;
@@ -45,6 +52,13 @@
             background-color: #f8d7da;
             color: #721c24;
             border: 1px solid #f5c6cb;
+=======
+        p {
+            max-width: 1200px;
+            margin: 0 auto 20px auto;
+            font-weight: 600;
+            font-size: 1.1rem;
+>>>>>>> origin/main
         }
 
         .table-wrapper {
@@ -54,6 +68,7 @@
         table {
             width: 100%;
             max-width: 1200px;
+<<<<<<< HEAD
             margin: auto;
             border-collapse: collapse;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
@@ -72,11 +87,34 @@
         thead th {
             background-color: #1976d2;
             color: #fff;
+=======
+            margin: 0 auto 30px auto;
+            border-collapse: collapse;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            background-color: #fff;
+        }
+
+        th, td {
+            padding: 12px 18px;
+            text-align: center;
+            border-bottom: 1px solid #e1e4e8;
+        }
+
+        thead th {
+            background-color: #4a90e2;
+            color: white;
+>>>>>>> origin/main
             font-weight: bold;
         }
 
         tbody tr:hover {
+<<<<<<< HEAD
             background-color: #f0f8ff;
+=======
+            background-color: #f1f8ff;
+>>>>>>> origin/main
         }
 
         .actions {
@@ -89,14 +127,22 @@
         .actions a,
         .actions button {
             padding: 6px 12px;
+<<<<<<< HEAD
             border-radius: 6px;
             font-weight: 500;
             font-size: 0.9rem;
             transition: background-color 0.2s ease;
+=======
+            border-radius: 5px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: background-color 0.3s ease;
+>>>>>>> origin/main
             color: white;
             border: none;
             cursor: pointer;
             text-decoration: none;
+<<<<<<< HEAD
             display: flex;
             align-items: center;
             gap: 6px;
@@ -162,16 +208,50 @@
             crossorigin="anonymous"
             referrerpolicy="no-referrer"
     />
+=======
+        }
+
+        .report { background-color: #2ecc71; }
+        .report:hover { background-color: #27ae60; }
+
+        .edit { background-color: #f39c12; }
+        .edit:hover { background-color: #d68910; }
+
+        .delete { background-color: #e74c3c; }
+        .delete:hover { background-color: #c0392b; }
+
+        p.links {
+            text-align: center;
+            font-size: 1rem;
+        }
+
+        p.links a {
+            color: #4a90e2;
+            text-decoration: none;
+            font-weight: 600;
+            margin: 0 12px;
+        }
+
+        p.links a:hover {
+            color: #2c3e50;
+            text-decoration: underline;
+        }
+    </style>
+>>>>>>> origin/main
 </head>
 <body>
 
 <h2>لیست شیفت‌ها</h2>
 
+<<<<<<< HEAD
 <p class="user-info">کاربر جاری: <span th:text="${currentUser}">کاربر</span></p>
 
 <!-- پیام‌های موفقیت و خطا -->
 <div th:if="${message}" class="flash-message success" th:text="${message}"></div>
 <div th:if="${error}" class="flash-message error" th:text="${error}"></div>
+=======
+<p>کاربر جاری: <span th:text="${currentUser}">کاربر</span></p>
+>>>>>>> origin/main
 
 <div class="table-wrapper">
     <table>
@@ -189,13 +269,19 @@
         </tr>
         </thead>
         <tbody>
+<<<<<<< HEAD
         <tr th:each="shift, iterStat : ${shifts}">
             <td th:text="${iterStat.count}">1</td>
+=======
+        <tr th:each="shift : ${shifts}">
+            <td th:text="${shift.id}">1</td>
+>>>>>>> origin/main
             <td th:text="${shift.operatorName}">اپراتور</td>
             <td th:text="${#temporals.format(shift.startTime, 'yyyy/MM/dd HH:mm')}">شروع</td>
             <td th:text="${#temporals.format(shift.endTime, 'yyyy/MM/dd HH:mm')}">پایان</td>
             <td th:text="${shift.powerGenerated ?: 0}">100</td>
             <td th:text="${shift.gasConsumed ?: 0}">50</td>
+<<<<<<< HEAD
             <td th:text="${#numbers.formatDecimal(shift.efficiency * 100, 1, 2) + '٪'}">80٪</td>
             <td th:text="${shift.durationMinutes ?: 0}">60</td>
             <td class="actions">
@@ -214,23 +300,47 @@
                         <button type="submit" class="delete" title="حذف">
                             <i class="fa-solid fa-trash"></i> حذف
                         </button>
+=======
+            <td th:text="${#numbers.formatDecimal(shift.efficiency * 100, 1, 2) + '٪'}">90٪</td>
+            <td th:text="${shift.durationMinutes ?: 0}">60</td>
+            <td class="actions">
+                <a th:href="@{/shift/report/{id}(id=${shift.id})}" target="_blank" class="report">گزارش PDF</a>
+
+                <span th:if="${isAdmin or (shift.operatorName == currentUser)}">
+                    <a th:href="@{/shift/edit/{id}(id=${shift.id})}" class="edit">ویرایش</a>
+                    <form th:action="@{/shift/delete/{id}(id=${shift.id})}" method="post" style="display:inline;" onsubmit="return confirm('آیا مطمئن هستید؟');">
+                        <button type="submit" class="delete">حذف</button>
+>>>>>>> origin/main
                     </form>
                 </span>
             </td>
         </tr>
+<<<<<<< HEAD
 
         <tr th:if="${#lists.isEmpty(shifts)}">
             <td colspan="9" class="no-shift">هیچ شیفتی یافت نشد.</td>
+=======
+        <tr th:if="${#lists.isEmpty(shifts)}">
+            <td colspan="9">هیچ شیفتی یافت نشد.</td>
+>>>>>>> origin/main
         </tr>
         </tbody>
     </table>
 </div>
 
+<<<<<<< HEAD
 <div class="nav-links">
     <a th:href="@{/shift/my}">شیفت‌های من</a>
     <a th:href="@{/shift/list}">همه شیفت‌ها</a>
     <a th:href="@{/shift/new}" th:if="${isAdmin}">ایجاد شیفت جدید</a>
 </div>
+=======
+<p class="links">
+    <a href="/shift/new">ایجاد شیفت جدید</a> |
+    <a href="/shift/list">نمایش همه گزارش‌ها</a> |
+    <a href="/shift/my">شیفت‌های من</a>
+</p>
+>>>>>>> origin/main
 
 </body>
 </html>

@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+<<<<<<< HEAD
     <title th:text="${shift.id == null} ? 'ثبت گزارش جدید' : 'ویرایش گزارش'">فرم گزارش</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css" rel="stylesheet" />
     <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazir-font@v30.1.0/dist/font-face.css" rel="stylesheet" />
@@ -13,6 +14,16 @@
         }
 
 
+=======
+    <title>نمایش / ویرایش گزارش</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css" rel="stylesheet" />
+    <style>
+        body {
+            font-family: 'Vazirmatn', sans-serif;
+            direction: rtl;
+        }
+
+>>>>>>> origin/main
         label {
             font-weight: bold;
         }
@@ -22,31 +33,49 @@
         }
     </style>
 </head>
+<<<<<<< HEAD
 <body>
 
 <div class="container mt-5">
+=======
+<body class="bg-light">
+
+<div class="container mt-4">
+>>>>>>> origin/main
     <div class="text-end mb-4">
         <h3 th:if="${shift.id == null}">ثبت گزارش جدید</h3>
         <h3 th:unless="${shift.id == null}">ویرایش گزارش شماره <span th:text="${shift.id}"></span></h3>
     </div>
 
+<<<<<<< HEAD
     <form th:action="@{/shift/save}" th:object="${shift}" method="post" class="row g-3">
 
+=======
+    <form th:action="@{/shift/save}" th:object="${shift}" method="post" class="row g-3" id="shiftForm">
+>>>>>>> origin/main
         <input type="hidden" th:field="*{id}" />
         <input type="hidden" th:field="*{operatorName}" />
 
         <div class="col-md-6">
             <label for="startTime" class="form-label">زمان شروع</label>
+<<<<<<< HEAD
             <input type="datetime-local" id="startTime" class="form-control"
                    th:field="*{startTime}"
                    th:readonly="${shift.id != null}" required />
+=======
+            <input type="datetime-local" id="startTime" class="form-control" th:field="*{startTime}" readonly />
+>>>>>>> origin/main
         </div>
 
         <div class="col-md-6">
             <label for="endTime" class="form-label">زمان پایان</label>
+<<<<<<< HEAD
             <input type="datetime-local" id="endTime" class="form-control"
                    th:field="*{endTime}"
                    th:readonly="${shift.id != null}" required />
+=======
+            <input type="datetime-local" id="endTime" class="form-control" th:field="*{endTime}" readonly />
+>>>>>>> origin/main
         </div>
 
         <div class="col-md-4">
@@ -55,7 +84,11 @@
         </div>
 
         <div class="col-md-4">
+<<<<<<< HEAD
             <label for="gasConsumed" class="form-label">مصرف گاز (متر مکعب)</label>
+=======
+            <label for="gasConsumed" class="form-label">مصرف گاز (مترمکعب)</label>
+>>>>>>> origin/main
             <input type="number" step="0.01" id="gasConsumed" class="form-control" th:field="*{gasConsumed}" required />
         </div>
 
@@ -78,10 +111,16 @@
         </div>
 
         <div class="col-12 mt-4 text-end">
+<<<<<<< HEAD
             <button type="submit" class="btn btn-primary" th:text="${shift.id == null} ? 'ثبت گزارش' : 'ویرایش گزارش'">ثبت</button>
 
             <a th:href="@{/shift/my}" class="btn btn-secondary" th:if="${shift.id == null}">↩ بازگشت</a>
             <a th:href="@{/shift/list}" class="btn btn-secondary" th:unless="${shift.id == null}">↩ بازگشت</a>
+=======
+            <!-- دکمه ارسال فرم -->
+            <button type="submit" class="btn btn-primary">✏️ ویرایش</button>
+            <a href="/shift/list" class="btn btn-secondary">↩ بازگشت</a>
+>>>>>>> origin/main
         </div>
     </form>
 </div>
