@@ -11,45 +11,64 @@
 
     <form th:action="@{/error/save}" th:object="${errorReport}" method="post" class="card p-4 shadow-sm bg-white">
 
-        <!-- Hidden ID field for editing existing reports -->
+        <!-- Hidden ID field -->
         <input type="hidden" th:field="*{id}" />
 
-        <!-- Report Time -->
+        <!-- زمان گزارش -->
         <div class="mb-3">
             <label class="form-label">⏱ زمان گزارش:</label>
             <input type="datetime-local" class="form-control" th:field="*{reportTime}" required />
         </div>
 
-        <!-- Operator Name (always readonly, always submitted) -->
+        <!-- نام اپراتور -->
         <div class="mb-3">
             <label class="form-label">👷 نام اپراتور:</label>
             <input type="text" class="form-control" th:value="*{operatorName}" readonly />
             <input type="hidden" th:field="*{operatorName}" />
         </div>
 
-        <!-- Error Description -->
+        <!-- شرح خطا -->
         <div class="mb-3">
             <label class="form-label">📝 شرح خطا:</label>
-            <textarea class="form-control" th:field="*{errorDescription}" rows="4" required></textarea>
+            <textarea class="form-control" th:field="*{errorDescription}" rows="3" required></textarea>
         </div>
 
-        <!-- Severity -->
+        <!-- علت خطا -->
+        <div class="mb-3">
+            <label class="form-label">❗ علت خطا:</label>
+            <textarea class="form-control" th:field="*{errorCause}" rows="2" placeholder="علت احتمالی خطا..."></textarea>
+        </div>
+
+        <!-- نحوه رفع خطا -->
+        <div class="mb-3">
+            <label class="form-label">✅ نحوه رفع خطا:</label>
+            <textarea class="form-control" th:field="*{resolutionMethod}" rows="2" placeholder="اقدامات انجام‌شده برای رفع..."></textarea>
+        </div>
+
+        <!-- مدت زمان خطا -->
+        <div class="mb-3">
+            <label class="form-label">⏳ مدت زمان خطا (دقیقه):</label>
+            <input type="number" class="form-control" th:field="*{errorDurationMinutes}" min="0" placeholder="مثلاً: 45" />
+        </div>
+
+        <!-- شدت خطا -->
         <div class="mb-3">
             <label class="form-label">🚨 شدت خطا:</label>
             <select class="form-select" th:field="*{severity}" required>
                 <option value="" disabled th:selected="*{severity} == null">انتخاب کنید</option>
-                <option value="کم" th:selected="*{severity} == 'کم'">کم</option>
-                <option value="متوسط" th:selected="*{severity} == 'متوسط'">متوسط</option>
-                <option value="زیاد" th:selected="*{severity} == 'زیاد'">زیاد</option>
-                <option value="بحرانی" th:selected="*{severity} == 'بحرانی'">بحرانی</option>
+                <option value="کم">کم</option>
+                <option value="متوسط">متوسط</option>
+                <option value="زیاد">زیاد</option>
+                <option value="بحرانی">بحرانی</option>
             </select>
         </div>
 
-        <!-- Buttons -->
+        <!-- دکمه‌ها -->
         <div class="d-flex justify-content-between">
             <a href="/error/list" class="btn btn-secondary">بازگشت</a>
             <button type="submit" class="btn btn-danger">💾 ذخیره</button>
         </div>
+
     </form>
 </div>
 </body>

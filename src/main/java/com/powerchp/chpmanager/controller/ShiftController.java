@@ -6,7 +6,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
-import org.apache.pdfbox.pdmodel.font.PDFont;
 import org.apache.pdfbox.pdmodel.font.PDType0Font;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
@@ -20,9 +19,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.security.Principal;
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Optional;
+import java.util.List;
 
 @Controller
 @RequestMapping("/shift")
@@ -41,8 +39,8 @@ public class ShiftController {
                 .anyMatch(role -> role.equals("ROLE_ADMIN"));
     }
 
-    private boolean isAuthorized(Shift shift, String username, boolean isAdmin) {
-        return shift != null && (isAdmin || shift.getOperatorName().equals(username));
+    private boolean isAuthorized(Shift shift, String username, boolean admin) {
+        return shift != null && (admin || shift.getOperatorName().equals(username));
     }
 
     @GetMapping({"", "/"})
@@ -50,37 +48,44 @@ public class ShiftController {
         return "redirect:/shift/my";
     }
 
+    // --- اصلاح شده: همه می توانند همه شیفت‌ها را ببینند ---
     @GetMapping("/list")
     public String listAllShifts(Model model, Principal principal, Authentication auth) {
         if (principal == null || auth == null) return "redirect:/login";
 
-        if (!isAdmin(auth)) {
-            return "redirect:/shift/my";
-        }
-
-        model.addAttribute("shifts", shiftService.findAllShifts());
+        List<Shift> shifts = shiftService.findAllShifts();
+        model.addAttribute("shifts", shifts);
         model.addAttribute("currentUser", principal.getName());
-        model.addAttribute("isAdmin", true);
-        return "shift_list";
+        model.addAttribute("isAdmin", isAdmin(auth));
+
+        return "shift_list";  // قالب یکسان با myShifts
     }
+
 
     @GetMapping("/my")
-    public String listMyShifts(Model model, Principal principal) {
-        if (principal == null) return "redirect:/login";
+    public String listMyShifts(Model model, Principal principal, Authentication auth) {
+        if (principal == null || auth == null) {
+            return "redirect:/login";
+        }
 
-        model.addAttribute("shifts", shiftService.findShiftsByOperatorName(principal.getName()));
-        model.addAttribute("currentUser", principal.getName());
-        model.addAttribute("isAdmin", false);
-        return "shift_list";
+        String currentUser = principal.getName();
+        List<Shift> shifts = shiftService.findShiftsByOperatorName(currentUser);
+
+        model.addAttribute("shifts", shifts);
+        model.addAttribute("currentUser", currentUser);
+        model.addAttribute("isAdmin", isAdmin(auth)); // فرض می‌کنیم این متد شما راستی‌آزمایی نقش ادمین را انجام می‌دهد
+
+        return "shift_list";  // نام قالب Thymeleaf
     }
 
+
     @GetMapping("/new")
-    public String createShiftForm(Model model, Principal principal) {
+    public String showCreateForm(Model model, Principal principal) {
         if (principal == null) return "redirect:/login";
 
         Shift shift = new Shift();
-        shift.setStartTime(LocalDateTime.now());
-        shift.setEndTime(LocalDateTime.now().plusHours(8));
+        shift.setStartTime(java.time.LocalDateTime.now());
+        shift.setEndTime(shift.getStartTime().plusHours(8));
         shift.setOperatorName(principal.getName());
 
         model.addAttribute("shift", shift);
@@ -93,9 +98,15 @@ public class ShiftController {
 
         String username = principal.getName();
         boolean admin = isAdmin(auth);
+        shift.setOperatorName(username);
+
+        Long excludeId = (shift.getId() != null) ? shift.getId() : -1L;
+        if (shiftService.hasOverlappingShift(username, shift.getStartTime(), shift.getEndTime(), excludeId)) {
+            redirectAttributes.addFlashAttribute("errorMessage", "تداخل زمانی با شیفت دیگری وجود دارد.");
+            return "redirect:/shift/my";
+        }
 
         if (shift.getId() == null) {
-            shift.setOperatorName(username);
             shiftService.saveShift(shift);
             redirectAttributes.addFlashAttribute("successMessage", "شیفت جدید با موفقیت ثبت شد.");
         } else {
@@ -104,10 +115,10 @@ public class ShiftController {
                 redirectAttributes.addFlashAttribute("errorMessage", "دسترسی به ویرایش ندارید.");
                 return "redirect:/shift/my";
             }
-            existing.setPowerGenerated(shift.getPowerGenerated());
-            existing.setGasConsumed(shift.getGasConsumed());
             existing.setStartTime(shift.getStartTime());
             existing.setEndTime(shift.getEndTime());
+            existing.setPowerGenerated(shift.getPowerGenerated());
+            existing.setGasConsumed(shift.getGasConsumed());
             shiftService.saveShift(existing);
             redirectAttributes.addFlashAttribute("successMessage", "شیفت با موفقیت به‌روزرسانی شد.");
         }
@@ -116,12 +127,12 @@ public class ShiftController {
     }
 
     @GetMapping("/edit/{id}")
-    public String editShiftForm(@PathVariable Long id, Model model, Principal principal, Authentication auth, RedirectAttributes redirectAttributes) {
+    public String editShift(@PathVariable Long id, Model model, Principal principal, Authentication auth, RedirectAttributes redirectAttributes) {
         if (principal == null || auth == null) return "redirect:/login";
 
         Shift shift = shiftService.findById(id);
         if (!isAuthorized(shift, principal.getName(), isAdmin(auth))) {
-            redirectAttributes.addFlashAttribute("errorMessage", "دسترسی به ویرایش ندارید یا گزارش وجود ندارد.");
+            redirectAttributes.addFlashAttribute("errorMessage", "دسترسی غیرمجاز به ویرایش.");
             return "redirect:/shift/my";
         }
 
@@ -135,7 +146,7 @@ public class ShiftController {
 
         Shift shift = shiftService.findById(id);
         if (!isAuthorized(shift, principal.getName(), isAdmin(auth))) {
-            redirectAttributes.addFlashAttribute("errorMessage", "دسترسی به حذف ندارید یا گزارش وجود ندارد.");
+            redirectAttributes.addFlashAttribute("errorMessage", "دسترسی غیرمجاز به حذف.");
             return "redirect:/shift/my";
         }
 
@@ -145,21 +156,20 @@ public class ShiftController {
     }
 
     @GetMapping("/report/{id}")
-    public void downloadPdfReport(@PathVariable Long id, Principal principal, Authentication auth, HttpServletResponse response) throws IOException {
+    public void generatePdfReport(@PathVariable Long id, Principal principal, Authentication auth, HttpServletResponse response) throws IOException {
         if (principal == null || auth == null) {
-            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "دسترسی غیرمجاز");
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "ابتدا وارد شوید.");
             return;
         }
 
         Shift shift = shiftService.findById(id);
         if (shift == null) {
-            response.sendError(HttpServletResponse.SC_NOT_FOUND, "گزارش یافت نشد");
+            response.sendError(HttpServletResponse.SC_NOT_FOUND, "گزارش یافت نشد.");
             return;
         }
 
-        boolean admin = isAdmin(auth);
-        if (!isAuthorized(shift, principal.getName(), admin)) {
-            response.sendError(HttpServletResponse.SC_FORBIDDEN, "شما مجاز به دریافت این گزارش نیستید");
+        if (!isAuthorized(shift, principal.getName(), isAdmin(auth))) {
+            response.sendError(HttpServletResponse.SC_FORBIDDEN, "دسترسی غیرمجاز به دریافت گزارش.");
             return;
         }
 
@@ -171,14 +181,15 @@ public class ShiftController {
                  PDPageContentStream cs = new PDPageContentStream(document, page)) {
 
                 if (fontStream == null) {
-                    response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "فونت فارسی یافت نشد");
+                    response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "فونت فارسی بارگذاری نشد.");
                     return;
                 }
 
-                PDFont font = PDType0Font.load(document, fontStream);
+                var font = PDType0Font.load(document, fontStream);
+
                 cs.beginText();
                 cs.setFont(font, 14);
-                cs.setLeading(20f);
+                cs.setLeading(22f);
                 cs.newLineAtOffset(50, 700);
 
                 DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm");
@@ -187,20 +198,18 @@ public class ShiftController {
                 cs.showText("اپراتور: " + shift.getOperatorName()); cs.newLine();
                 cs.showText("زمان شروع: " + dtf.format(shift.getStartTime())); cs.newLine();
                 cs.showText("زمان پایان: " + dtf.format(shift.getEndTime())); cs.newLine();
-                cs.showText("توان تولیدی: " + shift.getPowerGenerated() + " کیلووات ساعت"); cs.newLine();
+                cs.showText("توان تولیدی: " + shift.getPowerGenerated() + " کیلووات‌ساعت"); cs.newLine();
                 cs.showText("مصرف گاز: " + shift.getGasConsumed() + " مترمکعب"); cs.newLine();
-                cs.showText("راندمان: " + shift.getEfficiency()); cs.newLine();
                 cs.showText("مدت زمان: " + shift.getDurationMinutes() + " دقیقه"); cs.newLine();
+                cs.showText("راندمان: " + shift.getEfficiency()); cs.newLine();
 
                 cs.endText();
             }
 
             response.setContentType("application/pdf");
             response.setCharacterEncoding(StandardCharsets.UTF_8.name());
-            response.setHeader("Content-Disposition", "attachment; filename=\"shift_report_" + id + ".pdf\"");
+            response.setHeader("Content-Disposition", "attachment; filename=shift_report_" + id + ".pdf");
             response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
-            response.setHeader("Pragma", "no-cache");
-            response.setHeader("Expires", "0");
 
             document.save(response.getOutputStream());
         } catch (IOException e) {

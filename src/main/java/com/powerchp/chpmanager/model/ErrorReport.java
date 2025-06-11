@@ -19,16 +19,27 @@ public class ErrorReport {
 
     private String severity;
 
+    // 🆕 New fields
+    private String errorCause;
+
+    private String resolutionMethod;
+
+    private Integer errorDurationMinutes;
+
     // Constructors
     public ErrorReport() {
     }
 
     public ErrorReport(String operatorName, LocalDateTime reportTime,
-                       String errorDescription, String severity) {
+                       String errorDescription, String severity,
+                       String errorCause, String resolutionMethod, Integer errorDurationMinutes) {
         this.operatorName = operatorName;
         this.reportTime = reportTime;
         this.errorDescription = errorDescription;
         this.severity = severity;
+        this.errorCause = errorCause;
+        this.resolutionMethod = resolutionMethod;
+        this.errorDurationMinutes = errorDurationMinutes;
     }
 
     // Getters and Setters
@@ -70,5 +81,29 @@ public class ErrorReport {
 
     public void setSeverity(String severity) {
         this.severity = severity;
+    }
+
+    public String getErrorCause() {
+        return errorCause;
+    }
+
+    public void setErrorCause(String errorCause) {
+        this.errorCause = errorCause;
+    }
+
+    public String getResolutionMethod() {
+        return resolutionMethod;
+    }
+
+    public void setResolutionMethod(String resolutionMethod) {
+        this.resolutionMethod = resolutionMethod;
+    }
+
+    public Integer getErrorDurationMinutes() {
+        return errorDurationMinutes;
+    }
+
+    public void setErrorDurationMinutes(Integer errorDurationMinutes) {
+        this.errorDurationMinutes = errorDurationMinutes;
     }
 }

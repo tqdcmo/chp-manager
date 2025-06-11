@@ -4,10 +4,13 @@ import com.powerchp.chpmanager.model.ErrorReport;
 import com.powerchp.chpmanager.repository.ErrorReportRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @Controller
 @RequestMapping("/error")
@@ -16,53 +19,61 @@ public class ErrorReportController {
     @Autowired
     private ErrorReportRepository errorReportRepository;
 
-    // فرم گزارش خطا - نام اپراتور از کاربر لاگین شده گرفته و در مدل قرار داده می‌شود
+    // نمایش فرم ایجاد گزارش خطا
     @GetMapping("/new")
     public String showForm(Model model) {
-        ErrorReport errorReport = new ErrorReport();
-
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        String loggedInUsername = auth.getName();
-        errorReport.setOperatorName(loggedInUsername);
+        String username = auth.getName();
+
+        ErrorReport errorReport = new ErrorReport();
+        errorReport.setOperatorName(username);
 
         model.addAttribute("errorReport", errorReport);
         return "error_form";
     }
 
-    // ذخیره گزارش خطا - نام اپراتور همیشه از کاربر لاگین شده جایگزین می‌شود تا تغییر نکند
+    // ذخیره یا به‌روزرسانی گزارش خطا
     @PostMapping("/save")
     public String saveError(@ModelAttribute("errorReport") ErrorReport errorReport) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        String loggedInUsername = auth.getName();
+        String username = auth.getName();
 
-        errorReport.setOperatorName(loggedInUsername);
+        errorReport.setOperatorName(username);
         errorReportRepository.save(errorReport);
-
         return "redirect:/error/list?success=true";
     }
 
-    // نمایش لیست همه گزارش‌های خطا همراه با نام کاربر لاگین شده
+    // لیست گزارش‌ها: مدیر همه را می‌بیند، اپراتورها فقط گزارش خودشان را
     @GetMapping("/list")
     public String listErrors(Model model) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        String loggedInUsername = auth.getName();
+        String username = auth.getName();
+        boolean isAdmin = auth.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .anyMatch(role -> role.equals("ROLE_ADMIN"));
 
-        model.addAttribute("errors", errorReportRepository.findAll()); // همه گزارش‌ها
-        model.addAttribute("loggedInUsername", loggedInUsername);      // نام کاربر برای منطق در قالب
+        List<ErrorReport> errors = isAdmin ?
+                errorReportRepository.findAll() :
+                errorReportRepository.findByOperatorName(username);
 
+        model.addAttribute("errors", errors);
+        model.addAttribute("loggedInUsername", username);
+        model.addAttribute("isAdmin", isAdmin);
         return "error_list";
     }
 
-    // نمایش فرم ویرایش گزارش خطا - فقط اگر مالک گزارش باشد
+    // ویرایش: فقط مدیر یا صاحب گزارش
     @GetMapping("/edit/{id}")
     public String editError(@PathVariable Long id, Model model) {
         ErrorReport error = errorReportRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("گزارش خطا یافت نشد: " + id));
 
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        String loggedInUsername = auth.getName();
+        String username = auth.getName();
+        boolean isAdmin = auth.getAuthorities().stream()
+                .anyMatch(role -> role.getAuthority().equals("ROLE_ADMIN"));
 
-        if (!error.getOperatorName().equals(loggedInUsername)) {
+        if (!error.getOperatorName().equals(username) && !isAdmin) {
             return "redirect:/error/list?error=not_authorized";
         }
 
@@ -70,20 +81,22 @@ public class ErrorReportController {
         return "error_form";
     }
 
-    // حذف گزارش خطا - فقط اگر مالک گزارش باشد
+    // حذف: فقط مدیر یا صاحب گزارش
     @GetMapping("/delete/{id}")
     public String deleteError(@PathVariable Long id) {
         ErrorReport error = errorReportRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("گزارش خطا یافت نشد: " + id));
 
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        String loggedInUsername = auth.getName();
+        String username = auth.getName();
+        boolean isAdmin = auth.getAuthorities().stream()
+                .anyMatch(role -> role.getAuthority().equals("ROLE_ADMIN"));
 
-        if (!error.getOperatorName().equals(loggedInUsername)) {
+        if (!error.getOperatorName().equals(username) && !isAdmin) {
             return "redirect:/error/list?error=not_authorized";
         }
 
-        errorReportRepository.deleteById(id);
+        errorReportRepository.delete(error);
         return "redirect:/error/list?success=deleted";
     }
 }
